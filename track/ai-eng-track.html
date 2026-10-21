@@ -131,6 +131,7 @@ footer { margin-top: 60px; font-size: 13.5px; color: var(--muted); border-top: 1
 .fig-line { stroke: var(--muted); stroke-width: 1.5; fill: none; }
 .callout { border-inline-start: 3px solid var(--accent); background: var(--surface); padding: 10px 14px; border-radius: 6px; margin: 14px 0; font-size: 15.5px; }
 .callout .eyebrow { display:block; margin-bottom:4px; }
+.mcq { list-style: none; padding: 0; margin: 8px 0; display: grid; gap: 4px; }
 .lab-box { background: var(--code-bg); border-radius: 8px; padding: 10px 14px; font-size: 15px; margin: 12px 0; }
 </style>
 <div class="wrap" dir="rtl" lang="ar">
@@ -144,7 +145,8 @@ footer { margin-top: 60px; font-size: 13.5px; color: var(--muted); border-top: 1
 <nav class="tabs" role="tablist">
   <button role="tab" aria-controls="plan" aria-selected="true">الخطة</button>
   <button role="tab" aria-controls="m1" aria-selected="false">M1 · يعني إيه LLM ✓</button>
-  <button role="tab" aria-controls="m2" aria-selected="false">M2 · الموديل مبيفتكرش</button>
+  <button role="tab" aria-controls="m2" aria-selected="false">M2 · الموديل مبيفتكرش ✓</button>
+  <button role="tab" aria-controls="m3" aria-selected="false">M3 · JSON يدخل الكود</button>
 </nav>
 
 <!-- ============ PLAN ============ -->
@@ -177,9 +179,9 @@ footer { margin-top: 60px; font-size: 13.5px; color: var(--muted); border-top: 1
     <ol class="modlist">
       <li class="done"><div class="t">M1 · يعني إيه LLM؟ وأول request من الـ backend</div>
         <div class="meta">next-token prediction، token، model، تكلفة input/output، hallucination — Chip Huyen <i class="en">AI Engineering</i> ف1–ف2، Alammar &amp; Grootendorst <i class="en">Hands-On LLMs</i> ف2، anthropics/courses (API fundamentals) · النجاح: أول call لـ Claude من Node، وتحسب تكلفة السؤال بالسنت، وتقيس كام إجابة مختلفة من 5 مرات</div> <span class="pill done">خلص 2026-10-21</span></li>
-      <li class="now"><div class="t">M2 · الـ prompt والمحادثة: الموديل مبيفتكرش</div>
-        <div class="meta">system prompt، messages وأدوار user/assistant، الـ API stateless (إنت اللي بتبعت المحادثة كلها كل مرة)، context window — Huyen ف5، anthropics/courses (Prompt engineering، Real-world prompting)، Claude docs (Prompt engineering) · النجاح: chat endpoint بيفتكر آخر 10 رسايل، وتقيس التكلفة بتزيد إزاي مع طول المحادثة</div></li>
-      <li><div class="t">M3 · Structured output: الرد يبقى JSON يدخل الكود</div>
+      <li class="done"><div class="t">M2 · الـ prompt والمحادثة: الموديل مبيفتكرش</div>
+        <div class="meta">system prompt، messages وأدوار user/assistant، الـ API stateless (إنت اللي بتبعت المحادثة كلها كل مرة)، context window — Huyen ف5، anthropics/courses (Prompt engineering، Real-world prompting)، Claude docs (Prompt engineering) · النجاح: chat endpoint بيفتكر آخر 10 رسايل، وتقيس التكلفة بتزيد إزاي مع طول المحادثة</div> <span class="pill done">خلص 2026-10-22</span></li>
+      <li class="now"><div class="t">M3 · Structured output: الرد يبقى JSON يدخل الكود</div>
         <div class="meta">JSON schema، zod، <span class="en">messages.parse</span>، التحقق من الرد — Claude docs (Structured outputs)، Huyen ف5 · النجاح: classifier للـ support tickets بيرجّع JSON صح 50/50 مرة</div></li>
       <li><div class="t">M4 · Streaming والأخطاء: الـ call في الـ production</div>
         <div class="meta">streaming للـ UI، timeouts، retries، rate limits (429)، الـ refusal stop reason، fallbacks — Claude docs (Streaming, Errors, Rate limits) · النجاح: endpoint بيعمل stream، ولما تبعتله 50 request مرة واحدة ميقعش</div></li>
@@ -569,9 +571,9 @@ mode: greedy
     <div>
       <span class="eyebrow">هتقدر...</span>
       <ul class="cando">
-        <li>تجاوب في interview: "هو الـ LLM API بيفتكر المحادثة؟ أومال ChatGPT بيفتكر إزاي؟"</li>
-        <li>تبني "ذاكرة" لـ support bot في الـ backend بتاعك، وتعرف بتكلّفك كام</li>
-        <li>تعمل جزء الـ chat من اختبار المستوى 1</li>
+        <li class="ok">تجاوب في interview: "هو الـ LLM API بيفتكر المحادثة؟ أومال ChatGPT بيفتكر إزاي؟"</li>
+        <li class="ok">تبني "ذاكرة" لـ support bot في الـ backend بتاعك، وتعرف بتكلّفك كام</li>
+        <li class="ok">تعمل جزء الـ chat من اختبار المستوى 1</li>
       </ul>
     </div>
     <div>
@@ -778,7 +780,8 @@ Call 3 — ask again, sending the WHOLE conversation
       <p class="muted" style="font-size:14px">ملحوظة: عدّ <code>input_tokens + cache_read_input_tokens</code>. Ollama بيعدّي الجزء اللي قراه قبل كده من المحادثة، وبيحسبه في خانة لوحده. بس الموديل لسه شايفه كله. (الفكرة دي اسمها prompt caching، وهنتكلم عنها في M10.)</p></div><span class="pill done">خلص</span></div>
     <div class="task"><span class="rung">Task 3 · من الصفر، 20 دقيقة</span><div><b>آخر N رسايل + المعلومات المهمة:</b> في <code>src/m2/task-3/memory.ts</code> اكتب <code>keepLast</code> (تقصّ المحادثة لآخر N رسايل، والنتيجة لازم تبدأ برسالة <code>user</code>) و<code>buildSystem</code> (تحط المعلومات المهمة زي رقم الطلب تحت الـ system prompt). فيه 8 tests (<code>npm run m2:t3:test</code>). وبعدين التجربة: 15 رسالة، وبنبعت آخر 6 بس، مرة والـ facts شغّالة (<code>npm run m2:t3</code>) ومرة من غيرها (<code>npm run m2:t3:no-facts</code>).
       <p><b>قبل التجربة، توقّع للمرتين:</b> الدور 15 هيعرف رقم الطلب؟ وهيبعت كام token مقارنة بالدور 10 في Task 2 (460)؟</p></div><span class="pill done">خلص</span></div>
-    <div class="task"><span class="rung">Task 4 · Bug hunt</span><div>chat endpoint لكذا زبون في نفس الوقت (<code>src/m2/task-4</code>). زبون A قال رقم طلبه 4417، وزبون B قال 5520، وبعدين كل واحد سأل "رقم طلبي إيه؟". فيه حاجة غلط. شغّل <code>npm run m2:t4:server</code> و<code>npm run m2:t4:load</code>، ولاقيها من الأعراض، وصلّحها، وقيس <code>/sessions</code> قبل وبعد.</div><span class="pill now">دلوقتي</span></div>
+    <div class="task"><span class="rung">Task 4 · Bug hunt</span><div>chat endpoint لكذا زبون في نفس الوقت (<code>src/m2/task-4</code>). زبون A قال رقم طلبه 4417، وزبون B قال 5520، وبعدين كل واحد سأل "رقم طلبي إيه؟". فيه حاجة غلط. شغّل <code>npm run m2:t4:server</code> و<code>npm run m2:t4:load</code>، ولاقيها من الأعراض، وصلّحها، وقيس <code>/sessions</code> قبل وبعد.
+      <details><summary>الحل (بعد ما تخلّص)</summary>في <code>sessions.ts</code>: <code>sessions.set(customerId, EMPTY)</code>. الـ <code>EMPTY</code> ده array واحد اتعمل مرة واحدة، فكل زبون جديد بياخد <b>نفس</b> الـ array، زي دولاب واحد ومعاه مفتاحين. والتصليح: <code>sessions.set(customerId, [])</code>، عشان الـ <code>[]</code> جوّه الـ function بتعمل array جديد كل مرة. وفي الـ production المحادثة بتتخزّن في database أو Redis بالـ <code>customerId</code>، مش في الـ RAM.</details></div><span class="pill done">خلص</span></div>
   </div>
 
   <h2>سجل الأدلة</h2>
@@ -793,6 +796,9 @@ Call 3 — ask again, sending the WHOLE conversation
     <tr><td>Task 3 · الكود</td><td>2026-10-22</td><td>✓ 8/8 tests والـ type-check عدّى. ملاحظة: الـ shortcut <code>if (n >= history.length) return history.slice()</code> بيعدّي قاعدة "لازم تبدأ بـ user"، و<code>slice(-n)</code> لوحدها كانت كفاية. التوقّعات متكتبتش، وطلب إن كل الأسئلة تبقى اختيار من متعدد من هنا ورايح</td></tr>
     <tr><td>Task 3 · التجربة (15 رسالة، آخر 6)</td><td>2026-10-22</td><td>facts شغّالة: الدور 15 عرف 4417، وبعت 132 token. من غير facts: معرفش، وبعت 114. مقارنة بـ 460 في الدور 10 من غير قص. والدور 15 بعت 5 رسايل مش 6، عشان القصّة بدأت برد assistant واتشال</td></tr>
     <tr><td>أول سؤال اختيار من متعدد (ليه 5 رسايل مش 6؟)</td><td>2026-10-22</td><td>✓ اختار ب: آخر 6 بدأت برد assistant و<code>keepLast</code> شالته</td></tr>
+    <tr><td>Task 4 · قبل التصليح</td><td>2026-10-22</td><td><code>/sessions: { customer-A: 12, customer-B: 12 }</code>. ✓ لقى العَرَض: "الـ history متخزّن واحد للاتنين". بس معرفش يصلّحه، فاتشرح برسمة: array واحد عليه اسمين (reference)</td></tr>
+    <tr><td>Task 4 · سؤالين اختيار من متعدد</td><td>2026-10-22</td><td>✓ "إيه اللي بيحصل لزبون جديد؟" ب (نفس الـ EMPTY). ✓ "أنهي سطر يصلّح؟" ج (<code>[]</code> و<code>EMPTY.slice()</code> الاتنين بيعملوا array جديد)</td></tr>
+    <tr><td>Task 4 · بعد التصليح</td><td>2026-10-22</td><td>✓ <code>sessions.set(customerId, [])</code>، و<code>/sessions: { customer-A: 6, customer-B: 6 }</code> بدل 12 و12. نفس التصليح اتجرّب قبل كده ورجّع 4417 لـ A و5520 لـ B. ملحوظة: <code>EMPTY</code> لسه متعرّف ومش مستخدم. <b>Task 4 خلص</b></td></tr>
   </table></div>
 
   <h2>اختبر نفسك</h2>
@@ -820,10 +826,313 @@ Call 3 — ask again, sending the WHOLE conversation
     <p>وفيه بحث مشهور اسمه <i class="en">Lost in the Middle</i> (Liu et al., 2023) لقى إن الموديلات بتستخدم المعلومة كويس لو كانت في أول الكلام أو آخره، وأسوأ لو كانت في النص. <a href="https://arxiv.org/abs/2307.03172">arXiv 2307.03172</a>. الـ models الحالية أحسن بكتير في ده، بس الفكرة لسه مهمة: متحشرش كلام مالوش لازمة.</p>
   </details></div>
 
-  <div class="close-box"><b>قفلة الـ module</b><br>هتتكتب لما نخلص: إجابة سؤال أول الصفحة، ورقم الـ input tokens الحقيقي في الرسالة العاشرة جنب التقدير، وصح على كل "هتقدر" نثبتها.</div>
+  <div class="closed">
+    <span class="eyebrow">قفلة الـ module · 2026-10-22</span>
+    <p class="teaser" style="margin:0">ليه المحادثة الطويلة بتتوّه الموديل؟ وليه كل رسالة جديدة في نفس المحادثة بتبقى أغلى من اللي قبلها؟</p>
+    <p style="margin:0">لأن الموديل stateless. الـ backend بيبعتله المحادثة كلها من الأول مع كل رسالة، فكل رسالة شايلة اللي قبلها كله، وده بيخلّي العدّاد يزيد كل دور. ولما المحادثة تطول، الـ context بيتملي بكلام كتير قديم، والموديل بيتوه فيه. والحل في إيد الـ backend: إنت اللي بتختار الموديل يشوف إيه، يعني آخر N رسايل بس، والمعلومات المهمة تتحط في الـ system. ومايكروسوفت عملت أبسط نسخة من ده: 5 أسئلة وتبدأ من جديد.</p>
+    <div class="finish">
+      <div class="stat bad"><span class="big">46→460</span><div class="lbl">tokens اتبعتت من الدور 1 للدور 10 من غير قص (التقدير كان حوالي 50 لـ 1500، والردود طلعت أقصر بسبب الـ system)</div></div>
+      <div class="stat good"><span class="big">132</span><div class="lbl">tokens في الدور 15 بآخر 6 رسايل + facts، والموديل لسه فاكر 4417</div></div>
+      <div class="stat good"><span class="big">12→6</span><div class="lbl">رسايل متخزّنة لكل زبون في Task 4، قبل وبعد تصليحك (كل زبون بقى ليه ذاكرته)</div></div>
+    </div>
+    <p class="muted" style="margin:0">ملحوظة للمستوى: التوقّعات المفتوحة كانت بتتأجّل، فمن 2026-10-22 كل الأسئلة بقت اختيار من متعدد، وأول 3 كانوا 3/3. الفكرة اللي اتشرحت زيادة: الـ reference في JavaScript (array واحد في مكانين).</p>
+  </div>
 </section>
 
-<footer>Track بطريقة skill-coach · الصفحة دي بتتحدّث مع كل module · آخر تحديث 2026-10-21</footer>
+<!-- ============ M3 ============ -->
+<section id="m3" role="tabpanel" hidden>
+  <span class="eyebrow">المستوى 1 · Module 3</span>
+  <h2 style="margin-top:6px">Structured output: الرد يبقى JSON يدخل الكود</h2>
+
+  <div class="opener">
+    <div>
+      <span class="eyebrow">الحكاية (حقيقية، أغسطس 2024)</span>
+      <p>OpenAI عملت اختبار: طلبت من GPT-4 يرجّع JSON بشكل معقّد ومحدد، ووصفت الشكل في الـ prompt بالتفصيل.</p>
+      <p>الموديل كان فاهم المطلوب كويس جدًا. ومع ذلك، الرد اللي طلع مظبوط على الشكل المطلوب كان <b>أقل من 40%</b> من المرات.</p>
+      <p>عشان كده نزّلوا feature جديدة: الموديل <b>مايقدرش</b> يطلّع غير الشكل اللي إنت محدّده. ونفس الاختبار طلع 100%. ودلوقتي Claude فيه نفس الفكرة.</p>
+    </div>
+    <div class="teaser">ليه موديل فاهم الشكوى صح ممكن يوقّع الـ backend بتاعك؟ وإزاي تخلّي ده مستحيل يحصل؟</div>
+    <div>
+      <span class="eyebrow">خط النهاية (تقدير)</span>
+      <div class="finish">
+        <div class="stat bad"><span class="big">~7/10</span><div class="lbl">ردود بتعدّي من <code>JSON.parse</code> لو طلبت JSON في الـ prompt وخلاص (تقدير)</div></div>
+        <div class="stat good"><span class="big">50/50</span><div class="lbl">بعد الـ module: classifier للـ support tickets كل ردوده JSON صح ومتحقّق منه</div></div>
+      </div>
+    </div>
+    <div>
+      <span class="eyebrow">هتقدر...</span>
+      <ul class="cando">
+        <li class="ok">تاخد رد الموديل وتحطه في الـ database أو ترجّعه من الـ API من غير ما حاجة تقع</li>
+        <li class="ok">تجاوب في interview: "إزاي تضمن إن الـ LLM يرجّع JSON صح؟"</li>
+        <li class="ok">تعمل جزء الـ JSON المتحقّق منه في اختبار المستوى 1</li>
+      </ul>
+    </div>
+    <div>
+      <span class="eyebrow">إنت فين</span>
+      <div class="map">
+        <span class="lv">Beginner</span><span>M1 ✓</span><span>M2 ✓</span><span class="here">M3</span><span>M4</span>
+        <span class="lv">Intermediate</span><span>M5</span><span>M6</span><span>M7</span><span>M8</span><span>M9</span>
+        <span class="lv">Advanced</span><span>M10</span><span>M11</span><span>M12</span><span>M13</span><span>M14</span>
+        <span class="lv">Pro</span><span>M15</span><span>M16</span><span>M17</span><span>M18</span><span>M19</span>
+      </div>
+    </div>
+    <p class="muted" style="margin:0">الحجم: 5 أفكار صغيرة + 4 tasks في الـ lab · حوالي ساعتين على كذا قعدة.</p>
+  </div>
+
+  <p class="muted">كل الكلمات الجديدة متجمّعة في <a href="#m3-glossary">قاموس في آخر الصفحة</a>.</p>
+
+  <!-- Step 1 -->
+  <div class="step">
+    <span class="step-n">الفكرة 1</span>
+    <h3>جواب مكتوب، ولا فورمة متعبّية؟</h3>
+    <p>تخيّل موظف بيستقبل شكاوى، ومطلوب منه يسجّل كل شكوى في السيستم. لو كتبلك جواب: "الزبون ده شكله متضايق جدًا بخصوص الشحنة 4417"، إنت لازم تقرا الجواب وتطلّع منه المعلومة بإيدك.</p>
+    <p>بس لو ملالك فورمة فيها خانات (النوع: شحن، الأولوية: عالية، رقم الطلب: 4417)، الكود بتاعك يقدر يقرا كل خانة لوحدها على طول.</p>
+    <p class="keyline">الرد اللي جاي في خانات ثابتة، الكود يقدر يقراه، اسمه <span class="en">structured output</span>. وفي الـ backend الفورمة دي غالبًا بتبقى <span class="en">JSON</span>.</p>
+    <figure>
+      <svg viewBox="0 0 620 170" role="img" aria-label="على الشمال جواب نصّي الكود مايقدرش يقراه، وعلى اليمين فورمة JSON الكود بيقرا خاناتها">
+        <rect x="10" y="10" width="280" height="110" rx="8" class="fig-bad"/>
+        <text x="150" y="34" text-anchor="middle" class="m">free text</text>
+        <text x="150" y="62" text-anchor="middle">"الزبون متضايق جدًا</text>
+        <text x="150" y="84" text-anchor="middle">بخصوص الشحنة 4417..."</text>
+        <rect x="330" y="10" width="280" height="110" rx="8" class="fig-ok"/>
+        <text x="470" y="34" text-anchor="middle" class="m">JSON</text>
+        <text x="470" y="58" text-anchor="middle" class="m">category: "shipping"</text>
+        <text x="470" y="80" text-anchor="middle" class="m">urgency: "high"</text>
+        <text x="470" y="102" text-anchor="middle" class="m">orderId: "4417"</text>
+        <text x="150" y="150" text-anchor="middle" class="mut">الكود: أجيب الرقم منين؟ ✗</text>
+        <text x="470" y="150" text-anchor="middle" class="mut">الكود: data.orderId ✓</text>
+      </svg>
+      <figcaption>نفس المعلومة. بس واحدة الكود يقدر يستخدمها، والتانية لأ.</figcaption>
+    </figure>
+<pre>const data = JSON.parse(text);   // text = رد الموديل
+await db.tickets.insert({ category: data.category, urgency: data.urgency });</pre>
+    <div class="check"><b>اتأكد إنك فهمت:</b> عايز تعمل route بيوزّع كل شكوى على القسم الصح (billing أو shipping أو technical). محتاج من الموديل إيه؟
+      <ol class="mcq">
+        <li>أ) رد مكتوب بأدب للزبون</li>
+        <li>ب) JSON فيه خانة <code>category</code> قيمتها واحدة من الأقسام دي</li>
+        <li>ج) ملخّص للشكوى في 3 سطور</li>
+        <li>د) الموديل نفسه يبعت الشكوى للقسم</li>
+      </ol>
+      <details><summary>الإجابة</summary><b>ب.</b> الكود بتاعك هو اللي هيعمل <code>if (data.category === "billing")</code>، فمحتاج خانة ثابتة بقيمة معروفة. (أ) و(ج) نص حر، الكود مايقدرش يعمل عليه <code>if</code>. و(د) الموديل مابيبعتش حاجة لحد، هو بيرجّع نص بس (إلا لو إديته tool، ودي M5).</details></div>
+  </div>
+
+  <!-- Step 2 -->
+  <div class="step">
+    <span class="step-n">الفكرة 2</span>
+    <h3>طلبت JSON، جالك JSON في ظرف</h3>
+    <p>أسهل حاجة: تكتب في الـ prompt "رد بـ JSON بس". والموديل غالبًا هيكتب JSON سليم فعلًا.</p>
+    <p>بس هو متعوّد يكتب للبني آدمين. فساعات بيحط الـ JSON جوّه "ظرف": <code>```json</code> قبله و<code>```</code> بعده، زي ما بيحصل في الشات. أو يكتب "Sure! Here it is:" الأول.</p>
+    <p class="keyline">الظرف ده اسمه <span class="en">code fence</span>. والبني آدم مش بيشوفه أصلًا، بس <code>JSON.parse</code> بيقع منه على طول.</p>
+    <figure>
+      <svg viewBox="0 0 620 160" role="img" aria-label="رد الموديل فيه علامات ``` قبل وبعد الـ JSON، وJSON.parse بيقع عند أول حرف">
+        <rect x="10" y="10" width="360" height="130" rx="8" class="fig-box"/>
+        <rect x="24" y="22" width="110" height="26" rx="4" class="fig-bad"/><text x="79" y="40" text-anchor="middle" class="m">```json</text>
+        <text x="40" y="70" class="m">{ "category": "billing",</text>
+        <text x="40" y="92" class="m">  "urgency": "high" }</text>
+        <rect x="24" y="104" width="60" height="26" rx="4" class="fig-bad"/><text x="54" y="122" text-anchor="middle" class="m">```</text>
+        <defs><marker id="ar31" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="var(--muted)"/></marker></defs>
+        <path d="M374 75 H440" class="fig-line" marker-end="url(#ar31)"/>
+        <rect x="446" y="45" width="164" height="60" rx="8" class="fig-bad"/>
+        <text x="528" y="70" text-anchor="middle" class="m">JSON.parse</text>
+        <text x="528" y="92" text-anchor="middle">💥 SyntaxError</text>
+      </svg>
+      <figcaption>الـ JSON نفسه سليم. اللي موقّع الكود هو الظرف اللي حواليه.</figcaption>
+    </figure>
+<pre>JSON.parse('{"a": 1}');               // ✓ { a: 1 }
+JSON.parse('```json\n{"a": 1}\n```');  // 💥 SyntaxError: Unexpected token '`'</pre>
+    <div class="check"><b>اتأكد إنك فهمت:</b> الرد كان <code>"Sure! {\"urgency\": \"high\"}"</code>. <code>JSON.parse</code> هيعمل إيه؟
+      <ol class="mcq">
+        <li>أ) هيرجّع <code>{ urgency: "high" }</code> ويتجاهل الكلام اللي قبله</li>
+        <li>ب) هيرجّع الـ string زي ما هو</li>
+        <li>ج) هيرمي <code>SyntaxError</code></li>
+        <li>د) هيرجّع <code>null</code></li>
+      </ol>
+      <details><summary>الإجابة</summary><b>ج.</b> <code>JSON.parse</code> مش بيدوّر على JSON جوّه الكلام. لازم النص كله من أوله لآخره يكون JSON، غير كده بيرمي error. وده اللي بيخلّي (أ) غلط رغم إنها منطقية لبني آدم.</details></div>
+  </div>
+
+  <!-- Step 3 -->
+  <div class="step">
+    <span class="step-n">الفكرة 3</span>
+    <h3>بوّاب على الباب: JSON سليم مش كفاية</h3>
+    <p>افرض شِلت الظرف، و<code>JSON.parse</code> نجح. لسه ممكن يجيلك <code>"category": "Damaged Item"</code>، وده مش من الأقسام بتاعتك. أو <code>"urgency": "High"</code> بـ H كابيتال. أو <code>orderId: 4417</code> رقم بدل string.</p>
+    <p>كل دول JSON سليم 100%، بس الكود بتاعك هيمشي غلط بيهم من غير ما يقع، وده أوحش.</p>
+    <p class="keyline">الحل: بوّاب بيقارن كل رد بوصف ثابت للشكل المطلوب. الوصف ده اسمه <span class="en">schema</span>، والمكتبة اللي هنستخدمها للبوّاب اسمها <span class="en">zod</span>.</p>
+    <figure>
+      <svg viewBox="0 0 620 180" role="img" aria-label="ثلاث ردود بتعدّي على zod: واحد بيعدّي، واتنين بيترفضوا بسبب قيمة غلط ونوع غلط">
+        <defs><marker id="ar32" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="var(--muted)"/></marker></defs>
+        <rect x="10" y="10"  width="230" height="40" rx="6" class="fig-box"/><text x="125" y="35" text-anchor="middle" class="m">category: "billing"</text>
+        <rect x="10" y="70"  width="230" height="40" rx="6" class="fig-box"/><text x="125" y="95" text-anchor="middle" class="m">category: "Damaged Item"</text>
+        <rect x="10" y="130" width="230" height="40" rx="6" class="fig-box"/><text x="125" y="155" text-anchor="middle" class="m">orderId: 4417</text>
+        <rect x="280" y="10" width="110" height="160" rx="10" class="fig-acc"/><text x="335" y="85" text-anchor="middle" class="m">zod</text><text x="335" y="107" text-anchor="middle" class="mut">schema</text>
+        <path d="M244 30 H276" class="fig-line" marker-end="url(#ar32)"/>
+        <path d="M244 90 H276" class="fig-line" marker-end="url(#ar32)"/>
+        <path d="M244 150 H276" class="fig-line" marker-end="url(#ar32)"/>
+        <path d="M394 30 H430" class="fig-line" marker-end="url(#ar32)"/>
+        <path d="M394 90 H430" class="fig-line" marker-end="url(#ar32)"/>
+        <path d="M394 150 H430" class="fig-line" marker-end="url(#ar32)"/>
+        <rect x="436" y="10"  width="174" height="40" rx="6" class="fig-ok"/><text x="523" y="35" text-anchor="middle">✓ ادخل</text>
+        <rect x="436" y="70"  width="174" height="40" rx="6" class="fig-bad"/><text x="523" y="95" text-anchor="middle">✗ مش من الأقسام</text>
+        <rect x="436" y="130" width="174" height="40" rx="6" class="fig-bad"/><text x="523" y="155" text-anchor="middle">✗ عايز string</text>
+      </svg>
+      <figcaption>البوّاب مش بيصلّح حاجة. بيقول "ادخل" أو "لأ، وده السبب".</figcaption>
+    </figure>
+<pre>import { z } from "zod";
+
+const Ticket = z.object({
+  category: z.enum(["billing", "shipping", "technical", "other"]),
+  urgency: z.enum(["low", "medium", "high"]),
+  orderId: z.string().nullable(),
+});
+
+const result = Ticket.safeParse(data);
+if (result.success) save(result.data);      // result.data متأكدين من شكلها
+else console.log(result.error.issues);      // إيه اللي غلط بالظبط</pre>
+    <div class="lv-box"><span class="lv-tag">من Laravel</span>ده زي <code>$request->validate(['category' => 'required|in:billing,shipping,technical,other'])</code> بالظبط. الفرق إن الـ input هنا جاي من الموديل مش من الزبون. وبرضه مش بتثق فيه.</div>
+    <div class="check"><b>اتأكد إنك فهمت:</b> الموديل رجّع <code>{"category": "billing", "urgency": "urgent", "orderId": null}</code>. <code>Ticket.safeParse</code> هيرجّع إيه؟
+      <ol class="mcq">
+        <li>أ) <code>success: true</code>، عشان الـ JSON سليم</li>
+        <li>ب) <code>success: false</code>، عشان <code>orderId</code> بـ <code>null</code></li>
+        <li>ج) <code>success: false</code>، عشان <code>"urgent"</code> مش من <code>low / medium / high</code></li>
+        <li>د) هيرمي <code>SyntaxError</code></li>
+      </ol>
+      <details><summary>الإجابة</summary><b>ج.</b> الـ enum بيقبل الـ 3 قيم دول بس. (ب) غلط عشان إحنا كاتبين <code>.nullable()</code>، يعني <code>null</code> مسموح. و(د) غلط عشان zod مش بيعمل parse لنص، ده بيتحقّق من object طالع من <code>JSON.parse</code> خلاص.</details></div>
+  </div>
+
+  <!-- Step 4 -->
+  <div class="step">
+    <span class="step-n">الفكرة 4</span>
+    <h3>رجّعله الورقة بالأحمر</h3>
+    <p>البوّاب قال "لأ". تعمل إيه؟ ترمي error للزبون؟ لأ. اعمل زي المدرّس: يرجّع الورقة للطالب ومكتوب عليها بالأحمر الغلط فين، والطالب يصلّح.</p>
+    <p>يعني تبعت للموديل تاني نفس المحادثة، وتضيف عليها رده الغلط، ورسالة فيها الـ error اللي zod قاله بالظبط.</p>
+    <p class="keyline">ده اسمه <span class="en">retry with feedback</span>. وبتحط له حد (مثلًا محاولتين زيادة بس)، عشان كل محاولة بتتحسب tokens، فاكر عدّاد التاكسي؟</p>
+    <figure>
+      <svg viewBox="0 0 620 170" role="img" aria-label="الموديل يرد، zod يرفض، الـ backend يبعت الغلطة للموديل، الموديل يصلّح، zod يقبل">
+        <defs><marker id="ar33" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="var(--muted)"/></marker></defs>
+        <rect x="10" y="60" width="110" height="50" rx="8" class="fig-box"/><text x="65" y="90" text-anchor="middle" class="m">LLM</text>
+        <rect x="250" y="60" width="110" height="50" rx="8" class="fig-acc"/><text x="305" y="90" text-anchor="middle" class="m">zod</text>
+        <rect x="490" y="60" width="120" height="50" rx="8" class="fig-ok"/><text x="550" y="90" text-anchor="middle">✓ save</text>
+        <path d="M124 75 H246" class="fig-line" marker-end="url(#ar33)"/><text x="185" y="66" text-anchor="middle" class="m mut">"High"</text>
+        <path d="M305 114 V150 H65 V114" class="fig-line" marker-end="url(#ar33)"/>
+        <text x="185" y="142" text-anchor="middle" class="mut">"urgency لازم low/medium/high"</text>
+        <path d="M124 95 H246" class="fig-line" marker-end="url(#ar33)" stroke-dasharray="4 3"/><text x="185" y="110" text-anchor="middle" class="m mut">"high"</text>
+        <path d="M364 85 H486" class="fig-line" marker-end="url(#ar33)"/><text x="425" y="76" text-anchor="middle" class="mut">المحاولة 2</text>
+      </svg>
+      <figcaption>المحاولة التانية شايلة المحادثة كلها + الغلطة. يعني أغلى من الأولى (M2 الفكرة 4).</figcaption>
+    </figure>
+<pre>messages.push({ role: "assistant", content: text });
+messages.push({ role: "user", content: `Your JSON was invalid: ${issues}. Reply with corrected JSON only.` });
+// وتبعت تاني، بحد أقصى محاولتين زيادة</pre>
+    <div class="check"><b>اتأكد إنك فهمت:</b> في 50 شكوى، 45 عدّوا من أول مرة، و5 محتاجين محاولة تانية. المحاولة التانية بتبعت إيه بالظبط؟
+      <ol class="mcq">
+        <li>أ) رسالة الـ error بس، عشان الموديل فاكر الشكوى</li>
+        <li>ب) الشكوى + رد الموديل الغلط + رسالة الـ error</li>
+        <li>ج) نفس الـ request الأولى بالظبط، يمكن المرة دي يطلع صح</li>
+        <li>د) الشكوى بس، من غير الرد الغلط، عشان نوفّر tokens</li>
+      </ol>
+      <details><summary>الإجابة</summary><b>ب.</b> الموديل stateless (M2). لو بعت الـ error بس (أ)، مش هيعرف بتتكلم عن إيه. و(ج) ممكن تنفع ساعات عشان الموديل مش بيرد نفس الرد كل مرة (M1)، بس إنت بترمي المعلومة المهمة: هو غلط فين. و(د) نفس المشكلة.</details></div>
+  </div>
+
+  <!-- Step 5 -->
+  <div class="step">
+    <span class="step-n">الفكرة 5</span>
+    <h3>استمارة بخانات مقفولة: الغلط مايتكتبش أصلًا</h3>
+    <p>كل اللي فات بيصلّح الغلط <b>بعد</b> ما يحصل. فيه طريقة أحسن: استمارة أونلاين خانة "الأولوية" فيها dropdown بـ 3 اختيارات بس. مستحيل تكتب فيها "urgent".</p>
+    <p>الـ Claude API فيه نفس الحكاية: تدّيله الـ schema، وهو بيكتب الرد كلمة كلمة، مش بيسمح لأي token يخالف الـ schema يطلع أصلًا. ودي نفس الـ feature اللي في حكاية أول الـ module.</p>
+    <p class="keyline">ده اسمه <span class="en">constrained decoding</span>. وفي الـ SDK بتستخدمه بـ <code>output_config.format</code>، والأسهل <code>client.messages.parse</code> مع zod.</p>
+    <figure>
+      <svg viewBox="0 0 620 160" role="img" aria-label="الموديل بيختار التوكن الجاي، والـ schema بيقفل التوكنات اللي تكسره، فمايفضلش غير القيم المسموحة">
+        <rect x="10" y="20" width="230" height="40" rx="6" class="fig-box"/><text x="125" y="45" text-anchor="middle" class="m">{"urgency": "</text>
+        <text x="125" y="90" text-anchor="middle" class="mut">التوكن الجاي يبقى إيه؟</text>
+        <rect x="300" y="10"  width="140" height="30" rx="6" class="fig-ok"/><text x="370" y="30" text-anchor="middle" class="m">high</text>
+        <rect x="300" y="46"  width="140" height="30" rx="6" class="fig-ok"/><text x="370" y="66" text-anchor="middle" class="m">medium</text>
+        <rect x="300" y="82"  width="140" height="30" rx="6" class="fig-bad" stroke-dasharray="4 3"/><text x="370" y="102" text-anchor="middle" class="m">High 🔒</text>
+        <rect x="300" y="118" width="140" height="30" rx="6" class="fig-bad" stroke-dasharray="4 3"/><text x="370" y="138" text-anchor="middle" class="m">urgent 🔒</text>
+        <text x="530" y="70" text-anchor="middle">الـ schema</text><text x="530" y="92" text-anchor="middle">قافل اللي بيكسره</text>
+      </svg>
+      <figcaption>افتكر M1: الموديل بيختار التوكن الجاي. هنا الـ API بيشيل من الاختيارات أي توكن يكسر الـ schema.</figcaption>
+    </figure>
+<pre>import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
+
+const res = await client.messages.parse({
+  model, max_tokens: 1000,
+  messages: [{ role: "user", content: ticket }],
+  output_config: { format: zodOutputFormat(Ticket) },
+});
+res.parsed_output;   // { category, urgency, orderId } متحقّق منه</pre>
+    <div class="lab-box"><b>جرّبناها على Ollama:</b> الـ Anthropic endpoint بتاع Ollama 0.40.6 <b>بيتجاهل</b> <code>output_config.format</code>. الموديل كتب "This support ticket..." نص عادي، و<code>messages.parse</code> وقع بـ <code>Failed to parse structured output as JSON</code>. عشان كده الـ lab هيستخدم الأفكار 2 و3 و4 (تشيل الظرف، وzod، والـ retry). ولو شغّال على Claude، الفكرة 5 هي اللي تستخدمها في الـ production.</div>
+    <div class="check"><b>اتأكد إنك فهمت:</b> شغّال على Claude بـ <code>output_config.format</code>. لسه محتاج zod يتحقّق من الرد في الكود؟
+      <ol class="mcq">
+        <li>أ) لأ خالص، الـ API ضامن الشكل 100% في كل الحالات</li>
+        <li>ب) أيوه، عشان لو الرد اتقطع بسبب <code>max_tokens</code> أو الموديل رفض يرد، الـ JSON ممكن يبقى ناقص</li>
+        <li>ج) أيوه، عشان constrained decoding مش بيشتغل غير مع الـ enums</li>
+        <li>د) لأ، بس لازم تعمل retry 3 مرات على كل request</li>
+      </ol>
+      <details><summary>الإجابة</summary><b>ب.</b> الـ schema بيتحكّم في كل token بيطلع، بس مايقدرش يكمّل رد اتقطع (<code>stop_reason: "max_tokens"</code>، فاكر Task 4 في M1؟) أو رد الموديل رفض يكمّله (<code>"refusal"</code>). وكمان zod بيدّيك type في TypeScript. (ج) غلط، هو بيشتغل مع objects وstrings وأرقام كمان. وده هنكمّله في M4.</details></div>
+  </div>
+
+  <h2>غلطات مشهورة</h2>
+  <ul>
+    <li>تعمل <code>JSON.parse(text)</code> على الرد على طول من غير <code>try</code>، فأول code fence يوقّع الـ server.</li>
+    <li>تتحقّق إن الـ JSON سليم بس، ومن غير ما تتأكد من القيم، فـ <code>"High"</code> و<code>"Damaged Item"</code> يدخلوا الـ database.</li>
+    <li>تعمل retry من غير حد، فرد واحد غلط يفضل يلف ويدفّعك.</li>
+    <li>تفتكر إن <code>output_config.format</code> شغّال على أي provider. اتأكد الأول (Ollama بيتجاهله).</li>
+  </ul>
+
+  <h2>الـ Tasks في الـ lab</h2>
+  <div class="tasks">
+    <div class="task"><span class="rung">Task 1 · مثال محلول</span><div>
+      <b>اطلب JSON وخلاص:</b> ملف <code>src/m3/task-1/naive-json.ts</code> بيبعت 10 شكاوى، ويطلب في الـ prompt JSON بـ 3 خانات، ويدّي الرد لـ <code>JSON.parse</code> على طول، وبعدين يتأكد من القيم بإيده. وكل رد بياخد علامة: <code>OK</code>، أو <code>CRASH</code> (مش JSON)، أو <code>WRONG</code> (JSON بس القيم غلط).
+      اقرا الملف، واختار توقّعك <b>قبل</b> ما تشغّل <code>npm run m3:t1</code> (حوالي دقيقة):
+      <ol>
+        <li>كام رد من الـ 10 هياخد <code>OK</code>؟ أ) 9–10 · ب) 6–8 · ج) 3–5 · د) 0–2</li>
+        <li>أكتر سبب للـ <code>CRASH</code> هيبقى إيه؟ أ) الموديل كتب كلام بدل JSON · ب) code fence حوالين JSON سليم · ج) الرد اتقطع بسبب <code>max_tokens</code> · د) مفيش <code>CRASH</code> خالص</li>
+      </ol>
+      <details><summary>النتيجة الحقيقية (افتحها بعد ما تختار وتشغّل)</summary>
+<pre>#1 CRASH  JSON.parse failed
+   raw reply: "```json\n{\n  \"category\": \"technical\",\n  \"urgency\": \"high\",\n  \"orderId\": \"4417\"\n}\n```"
+...
+#6 OK
+   raw reply: "{\n  \"category\": \"technical\",\n  \"urgency\": \"medium\",\n  \"orderId\": null\n}"
+...
+OK: 2   CRASH (not JSON): 8   WRONG (JSON, bad values): 0   out of 10</pre>
+        <b>1 د، 2 ب.</b> 8 من 10 وقعوا، وكلهم نفس السبب: JSON سليم جوّه <code>```json ... ```</code>. والقيم نفسها كانت كلها من المسموح. يعني الموديل كان فاهم المطلوب، والكود هو اللي وقع.
+        <b>وبص على #1:</b> "الأوردر وصل مكسور" اتصنّف <code>technical</code>. مش غلط في الـ schema، بس غلط في المعنى (المفروض shipping). الـ schema بيضمن الشكل، مش الصح. والسؤال ده (هو صنّف صح؟) هيبقى موضوع الـ evals في M8.
+      </details>
+    </div><span class="pill">دلوقتي</span></div>
+    <div class="task"><span class="rung">Task 2 · كمّل الناقص</span><div><b>شيل الظرف وحط البوّاب:</b> هتكتب <code>extractJson</code> (تشيل الـ code fence) والـ zod schema، وتعيد نفس الـ 10 شكاوى، وتعدّ كام عدّى. (هيتجهّز لما تخلّص Task 1)</div><span class="pill">جاي</span></div>
+    <div class="task"><span class="rung">Task 3 · من الصفر، 20 دقيقة</span><div><b>classifier بالـ retry:</b> function <code>classify(ticket)</code> بتعمل retry with feedback بحد أقصى محاولتين، وليها tests بموديل وهمي. وبعدين 50 شكوى، والنجاح: 50/50 متحقّق منهم، مع عدد الـ retries وتكلفتهم.</div><span class="pill">جاي</span></div>
+    <div class="task"><span class="rung">Task 4 · Bug hunt</span><div>endpoint بيصنّف الشكاوى، وفيه حاجة غلط. هتلاقيها من الأعراض.</div><span class="pill">جاي</span></div>
+  </div>
+
+  <h2>سجل الأدلة</h2>
+  <div class="tablewrap"><table>
+    <tr><th>الـ task</th><th>التاريخ</th><th>النتيجة</th></tr>
+    <tr><td>Task 1 · تجربة قبل الـ module (من عندي)</td><td>2026-10-22</td><td>Ollama: <code>OK 2 · CRASH 8 · WRONG 0</code> من 10. و<code>messages.parse</code> + <code>output_config.format</code> اتجاهل على Ollama</td></tr>
+  </table></div>
+
+  <div class="glossary" id="m3-glossary">
+    <b>قاموس M3</b> <span class="from">بترتيب ما اتعلّمنا</span>
+    <dl>
+      <dt>structured output</dt><dd>رد في خانات ثابتة الكود يقدر يقراه، مش نص حر.</dd>
+      <dt>JSON</dt><dd>الشكل اللي الخانات دي بتتكتب بيه: <code>{"key": "value"}</code>.</dd>
+      <dt>code fence</dt><dd>العلامات <code>```json</code> و<code>```</code> اللي الموديل بيحطها حوالين الكود، و<code>JSON.parse</code> بيقع منها.</dd>
+      <dt>schema</dt><dd>وصف ثابت لشكل الرد: أنهي خانات، وكل خانة نوعها إيه وقيمها المسموحة.</dd>
+      <dt>zod</dt><dd>مكتبة TypeScript بتكتب بيها الـ schema وبتتحقّق بيها من أي object (<code>safeParse</code>).</dd>
+      <dt>retry with feedback</dt><dd>تبعت للموديل تاني ومعاك رده الغلط والـ error، عشان يصلّح، بحد أقصى معروف.</dd>
+      <dt>constrained decoding</dt><dd>الـ API بيمنع الموديل يطلّع أي token يكسر الـ schema، فالشكل مضمون من الأول.</dd>
+    </dl>
+  </div>
+
+  <h2>أسئلة المراجعة</h2>
+  <div class="check"><b>1.</b> ليه <code>JSON.parse</code> لوحده مش كفاية على رد الموديل؟
+    <ol class="mcq"><li>أ) عشان بطيء</li><li>ب) عشان JSON سليم ممكن يبقى قيمه برّه المسموح</li><li>ج) عشان مش بيدعم العربي</li><li>د) هو كفاية لو الـ prompt كويس</li></ol>
+    <details><summary>الإجابة</summary><b>ب.</b> <code>JSON.parse</code> بيتأكد من الشكل بس. القيم (زي <code>"High"</code>) محتاجة schema.</details></div>
+  <div class="check"><b>2.</b> إمتى تستخدم retry with feedback بدل <code>output_config.format</code>؟
+    <ol class="mcq"><li>أ) دايمًا، هو أرخص</li><li>ب) لما الـ provider مش بيدعم constrained decoding (زي Ollama عندنا)</li><li>ج) مع Claude بس</li><li>د) مش محتاجه أبدًا</li></ol>
+    <details><summary>الإجابة</summary><b>ب.</b> الـ retry بيكلّف tokens زيادة، فلو الـ API بيضمن الشكل من الأول ده أحسن. بس لو مش بيدعمه، الـ retry هو شبكة الأمان.</details></div>
+</section>
+
+<footer>Track بطريقة skill-coach · الصفحة دي بتتحدّث مع كل module · آخر تحديث 2026-10-22</footer>
 </div>
 
 <script>
@@ -838,7 +1147,7 @@ Call 3 — ask again, sending the WHOLE conversation
     try { localStorage.setItem('aieng-tab', id); } catch (e) {}
   };
   tabs.forEach((t) => t.addEventListener('click', () => { show(t.getAttribute('aria-controls')); history.replaceState(null, '', '#' + t.getAttribute('aria-controls')); }));
-  ['m1-glossary','m2-glossary'].forEach((g) => document.querySelectorAll('a[href="#' + g + '"]').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); document.getElementById(g).scrollIntoView({ behavior: 'smooth' }); })));
+  ['m1-glossary','m2-glossary','m3-glossary'].forEach((g) => document.querySelectorAll('a[href="#' + g + '"]').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); document.getElementById(g).scrollIntoView({ behavior: 'smooth' }); })));
   let start = location.hash.slice(1);
   if (start.endsWith('-glossary')) start = start.split('-')[0];
   if (!tabs.some((t) => t.getAttribute('aria-controls') === start)) { try { start = localStorage.getItem('aieng-tab') || 'plan'; } catch (e) { start = 'plan'; } }

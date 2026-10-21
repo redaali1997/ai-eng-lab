@@ -12,9 +12,10 @@ Each module adds a folder under `src/mN/`. Nothing here is a real project.
 | @types/node | 26.6.5 |
 | @anthropic-ai/sdk | 0.135.0 |
 | Ollama (free local LLM) | 0.40.6 via Homebrew, model `gemma4:e2b-it-qat` (4.3 GB) — speaks the Anthropic Messages API |
+| zod | 4.6.7 (from Module 3) |
 | Default model | `gemma4:e2b-it-qat` on Ollama, or `claude-opus-5-5` on Anthropic (override with `AI_MODEL`) |
 
-Later modules will add (pinned when we get there): `zod` 4.6.7, `pg` 8.23.1, Docker image `pgvector/pgvector:0.8.7-pg18-trixie`, `@modelcontextprotocol/sdk` 1.32.1.
+Later modules will add (pinned when we get there): `pg` 8.23.1, Docker image `pgvector/pgvector:0.8.7-pg18-trixie`, `@modelcontextprotocol/sdk` 1.32.1.
 
 ## Setup
 
@@ -97,7 +98,7 @@ and why we still paid for them. Write down `emptyAnswers` and `costUsd` before a
 | 1 | Worked example | done | Three calls: tell the model an order number, ask without history, ask with history. |
 | 2 | Fill the gap | done | Terminal chat that keeps the conversation in an array; print input tokens every turn. |
 | 3 | From scratch, timed | done | Keep only the last N messages without breaking user/assistant order + keep key facts in the system prompt, with tests. |
-| 4 | Bug hunt | **current** | A multi-customer chat endpoint has a problem. Find it from the symptoms. |
+| 4 | Bug hunt | done | A multi-customer chat endpoint has a problem. Find it from the symptoms. |
 
 ### M2 Task 1 — how to run
 
@@ -146,6 +147,27 @@ npm run m2:t4:load     # terminal 2: two customers chat, then prints /sessions
 
 Done when, on a freshly started server and one load run: customer A gets 4417, customer B gets 5520,
 and `/sessions` makes sense for two separate customers. Write down the `/sessions` output before and after.
+
+## Module 3 — Structured output: the reply becomes JSON your code can use
+
+| Task | Rung | Status | What |
+|---|---|---|---|
+| 1 | Worked example | current | Ask for JSON in the prompt, feed the reply straight to `JSON.parse`, and count what survives. |
+| 2 | Fill the gap | upcoming | Strip the wrapping and validate the reply with a zod schema. |
+| 3 | From scratch, timed | upcoming | `classify(ticket)` with retry-on-invalid (max 2 retries), with tests; 50 tickets must all be valid. |
+| 4 | Bug hunt | upcoming | A ticket-classifier endpoint has a problem. Find it from the symptoms. |
+
+Note: Ollama 0.40.6 ignores `output_config.format` (Claude's constrained decoding), so `client.messages.parse`
+fails on Ollama. This module validates in our own code instead; on Claude you would use both.
+
+### M3 Task 1 — how to run
+
+```bash
+npm run m3:t1   # 10 tickets, about 1 minute on Ollama
+```
+
+Before running, pick: (1) How many of the 10 replies will be `OK`? a) 9–10 b) 6–8 c) 3–5 d) 0–2
+(2) The most common reason for `CRASH`? a) prose instead of JSON b) a code fence around valid JSON c) cut off by `max_tokens` d) no crashes at all
 
 ## How to measure (Module 1)
 
