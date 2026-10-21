@@ -5,7 +5,7 @@ const EMPTY: Message[] = [];
 const sessions = new Map<string, Message[]>();
 
 export function historyFor(customerId: string): Message[] {
-  if (!sessions.has(customerId)) sessions.set(customerId, EMPTY);
+  if (!sessions.has(customerId)) sessions.set(customerId, []);
   return sessions.get(customerId)!;
 }
 
