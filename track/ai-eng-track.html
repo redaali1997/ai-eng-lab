@@ -1,0 +1,848 @@
+<title>AI Engineering للـ Backend</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@500;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: دفتر مهندس backend بيجرّب LLMs — عمود قراية RTL، خط زمني للـ modules، tabs بين الخطة والـ modules. لون teal للـ AI. */
+:root {
+  --bg: #f5f8f7;
+  --surface: #ffffff;
+  --ink: #15212a;
+  --muted: #5b6b76;
+  --line: #d9e1e6;
+  --accent: #0b7a6f;
+  --accent-soft: #e2f3f0;
+  --good: #2b8a3e;
+  --good-soft: #e6f4ea;
+  --bad: #c92a2a;
+  --bad-soft: #fdecec;
+  --code-bg: #eef2f4;
+  --f-display: "Readex Pro", "IBM Plex Sans Arabic", "Segoe UI", system-ui, sans-serif;
+  --f-body: "IBM Plex Sans Arabic", "Segoe UI", Tahoma, system-ui, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f171c; --surface: #16222a; --ink: #e4edf1; --muted: #93a6b1; --line: #2a3a44;
+    --accent: #5fd3c4; --accent-soft: #123430; --good: #69db7c; --good-soft: #163322;
+    --bad: #ff8787; --bad-soft: #3a1c1f; --code-bg: #1c2b34; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f171c; --surface: #16222a; --ink: #e4edf1; --muted: #93a6b1; --line: #2a3a44;
+  --accent: #5fd3c4; --accent-soft: #123430; --good: #69db7c; --good-soft: #163322;
+  --bad: #ff8787; --bad-soft: #3a1c1f; --code-bg: #1c2b34; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 16.5px/1.8 var(--f-body); }
+.wrap { max-width: 860px; margin: 0 auto; padding-block: 28px 80px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; line-height: 1.35; margin: 0; }
+h1 { font-size: clamp(30px, 6vw, 42px); font-weight: 700; }
+h2 { font-size: 25px; font-weight: 700; margin-top: 44px; }
+h3 { font-size: 19px; font-weight: 500; margin-top: 26px; }
+p { margin: 10px 0; max-width: 68ch; }
+a { color: var(--accent); }
+code, .mono, pre { font-family: var(--f-mono); direction: ltr; unicode-bidi: isolate; }
+code { font-size: 0.86em; }
+:not(pre) > code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
+pre { background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; overflow-x: auto; font-size: 13.5px; line-height: 1.55; margin: 12px 0; text-align: left; display: block; }
+.en { direction: ltr; unicode-bidi: isolate; }
+.eyebrow { font: 600 12.5px/1.2 var(--f-body); letter-spacing: 0.02em; color: var(--accent); }
+.lede { font-size: 18px; color: var(--muted); }
+.muted { color: var(--muted); }
+header.top { display: flex; flex-direction: column; gap: 8px; padding-bottom: 18px; border-bottom: 1px solid var(--line); }
+nav.tabs { display: flex; gap: 6px; flex-wrap: wrap; margin: 18px 0 8px; position: sticky; top: env(safe-area-inset-top, 0px); background: var(--bg); padding-block: 8px; z-index: 5; }
+nav.tabs button { font: 600 14px var(--f-body); border: 1px solid var(--line); background: var(--surface); color: var(--ink); padding: 6px 14px; border-radius: 99px; cursor: pointer; }
+nav.tabs button[aria-selected="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+nav.tabs button:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.tablewrap { overflow-x: auto; margin: 12px 0; }
+table { border-collapse: collapse; width: 100%; font-size: 15px; }
+th, td { text-align: start; vertical-align: top; padding: 9px 10px; border-bottom: 1px solid var(--line); }
+th { font: 600 13px var(--f-body); color: var(--muted); }
+.num { font-variant-numeric: tabular-nums; }
+.pill { display: inline-block; font: 600 12px/1 var(--f-body); padding: 5px 9px; border-radius: 99px; white-space: nowrap; border: 1px solid var(--line); color: var(--muted); }
+.pill.done { background: var(--good-soft); color: var(--good); border-color: transparent; }
+.pill.now { background: var(--accent-soft); color: var(--accent); border-color: transparent; }
+.level { margin-top: 30px; }
+.level-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.modlist { list-style: none; padding: 0; margin: 10px 0 0; border-inline-start: 2px solid var(--line); }
+.modlist li { position: relative; padding-block: 10px; padding-inline-start: 20px; }
+.modlist li::before { content: ""; position: absolute; inset-inline-start: -7px; top: 20px; width: 12px; height: 12px; border-radius: 50%; background: var(--bg); border: 2px solid var(--line); }
+.modlist li.done::before { background: var(--good); border-color: var(--good); }
+.modlist li.now::before { background: var(--accent); border-color: var(--accent); }
+.modlist .t { font-weight: 600; }
+.modlist .meta { font-size: 14.5px; color: var(--muted); }
+.passtest { background: var(--surface); border: 1px dashed var(--accent); border-radius: 8px; padding: 12px 14px; margin-top: 10px; font-size: 15.5px; }
+.opener { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 22px; margin-top: 18px; display: grid; gap: 18px; }
+.teaser { font-family: var(--f-display); font-size: 21px; font-weight: 500; line-height: 1.6; border-inline-start: 3px solid var(--accent); padding-inline-start: 14px; }
+.finish { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.stat { border-radius: 10px; padding: 14px; min-width: 0; }
+.stat.bad { background: var(--bad-soft); } .stat.good { background: var(--good-soft); }
+.stat .big { font: 700 34px/1.2 var(--f-mono); font-variant-numeric: tabular-nums; direction: ltr; unicode-bidi: isolate; display: inline-block; }
+.stat.bad .big { color: var(--bad); } .stat.good .big { color: var(--good); }
+.stat .lbl { font-size: 14.5px; color: var(--muted); }
+ul.cando { padding: 0; list-style: none; margin: 6px 0; display: grid; gap: 6px; }
+ul.cando li::before { content: "☐ "; color: var(--accent); font-weight: 700; }
+ul.cando li.ok::before { content: "☑ "; color: var(--good); }
+.map { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; }
+.map span { font: 600 11px/1 var(--f-mono); padding: 6px 7px; border-radius: 5px; background: var(--code-bg); color: var(--muted); }
+.map span.here { background: var(--accent); color: var(--bg); }
+.map span.lv { background: transparent; font-family: var(--f-body); font-size: 12.5px; color: var(--ink); padding-inline-start: 8px; }
+.applyit { border: 1px solid var(--accent); background: var(--accent-soft); border-radius: 10px; padding: 14px 16px; margin: 16px 0; }
+.applyit .eyebrow { display: block; margin-bottom: 6px; }
+figure { margin: 18px 0; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px; overflow-x: auto; }
+figure svg { display: block; width: 100%; height: auto; min-width: 560px; direction: ltr; }
+figcaption { font-size: 14px; color: var(--muted); margin-top: 8px; }
+svg text { font-family: var(--f-body); fill: var(--ink); font-size: 13px; unicode-bidi: plaintext; }
+svg .m { font-family: var(--f-mono); font-size: 12px; }
+svg .mut { fill: var(--muted); }
+details { border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; margin: 8px 0; background: var(--surface); }
+summary { cursor: pointer; font-weight: 600; }
+details[open] summary { margin-bottom: 6px; }
+.tasks { display: grid; gap: 10px; margin: 12px 0; }
+.task { display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: start; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+.task .rung { font: 700 12.5px/1.4 var(--f-body); color: var(--accent); white-space: nowrap; }
+.task > div { min-width: 0; }
+.close-box { border: 1px dashed var(--line); border-radius: 10px; padding: 16px; color: var(--muted); }
+.step { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; margin-top: 22px; }
+.step h3 { margin-top: 4px; }
+.step-n { font: 600 12.5px/1 var(--f-body); color: var(--bg); background: var(--accent); padding: 5px 10px; border-radius: 99px; display: inline-block; }
+.keyline { font-family: var(--f-display); font-size: 18px; font-weight: 500; border-inline-start: 3px solid var(--accent); padding-inline-start: 12px; }
+.check { background: var(--accent-soft); border-radius: 10px; padding: 12px 14px; margin-top: 14px; }
+.check details { background: var(--surface); }
+.glossary { background: var(--surface); border: 1px dashed var(--accent); border-radius: 12px; padding: 16px 18px; margin-top: 22px; }
+.glossary dl { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; margin: 8px 0 0; }
+.glossary dt { font-family: var(--f-mono); font-weight: 600; direction: ltr; unicode-bidi: isolate; }
+.glossary dd { margin: 0; min-width: 0; }
+.glossary .from { font-size: 12.5px; color: var(--muted); }
+.more { margin-top: 26px; }
+@media (max-width: 520px) { .step { padding: 14px; } .glossary dl { grid-template-columns: 1fr; } .glossary dd { margin-bottom: 6px; } }
+.lv-box { background: var(--good-soft); border-radius: 8px; padding: 8px 12px; font-size: 15px; }
+.lv-tag { font: 600 12px/1 var(--f-body); color: var(--good); margin-inline-end: 6px; }
+.closed { background: var(--surface); border: 1px solid var(--good); border-radius: 12px; padding: 16px 18px; display: grid; gap: 10px; }
+.version { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; font-size: 14.5px; }
+footer { margin-top: 60px; font-size: 13.5px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 14px; }
+@media (max-width: 520px) { .task { grid-template-columns: 1fr; } .opener { padding: 16px; } }
+@media (prefers-reduced-motion: no-preference) { section[role="tabpanel"] { animation: fade .2s ease-out; } @keyframes fade { from { opacity: .4 } to { opacity: 1 } } }
+.fig-ok { fill: var(--good-soft); stroke: var(--good); }
+.fig-bad { fill: var(--bad-soft); stroke: var(--bad); }
+.fig-box { fill: var(--surface); stroke: var(--line); }
+.fig-acc { fill: var(--accent-soft); stroke: var(--accent); }
+.fig-line { stroke: var(--muted); stroke-width: 1.5; fill: none; }
+.callout { border-inline-start: 3px solid var(--accent); background: var(--surface); padding: 10px 14px; border-radius: 6px; margin: 14px 0; font-size: 15.5px; }
+.callout .eyebrow { display:block; margin-bottom:4px; }
+.lab-box { background: var(--code-bg); border-radius: 8px; padding: 10px 14px; font-size: 15px; margin: 12px 0; }
+</style>
+<div class="wrap" dir="rtl" lang="ar">
+<header class="top">
+  <span class="eyebrow">Track · skill-coach · بدأ 2026-10-19</span>
+  <h1><span class="en">AI Engineering</span> للـ <span class="en">Backend</span></h1>
+  <p class="lede">من "يعني إيه LLM أصلًا؟" لحد ما تبني features حقيقية بالـ AI جوّه الـ backend بتاعك: بتتقاس، ومأمّنة، وعارف بتكلّف كام.</p>
+  <p class="muted">نوع الـ skill: <b>technical</b> (lab بأرقام حقيقية) + شوية <b>judgment</b> (إمتى تستخدم AI وإمتى لأ، وأنهي model، وبكام).</p>
+</header>
+
+<nav class="tabs" role="tablist">
+  <button role="tab" aria-controls="plan" aria-selected="true">الخطة</button>
+  <button role="tab" aria-controls="m1" aria-selected="false">M1 · يعني إيه LLM ✓</button>
+  <button role="tab" aria-controls="m2" aria-selected="false">M2 · الموديل مبيفتكرش</button>
+</nav>
+
+<!-- ============ PLAN ============ -->
+<section id="plan" role="tabpanel">
+  <div class="version">
+    <b>الإصدارات</b> (اتأكدت منها يوم 2026-10-19 من الـ npm registry والـ docs الرسمية):
+    <span class="en">@anthropic-ai/sdk 0.135.0</span> (اتنشر 2026-10-15) ·
+    الـ model الافتراضي <span class="en">claude-opus-5-5</span> ·
+    <span class="en">Node.js 26</span> + <span class="en">TypeScript 7.0.2</span> ·
+    <span class="en">zod 4.6.7</span> ·
+    <span class="en">pgvector 0.8.7</span> على <span class="en">Postgres 18</span> ·
+    <span class="en">MCP spec 2026-07-28</span> + <span class="en">@modelcontextprotocol/sdk 1.32.1</span> ·
+    <span class="en">Vercel AI SDK (ai) 7.0.143</span> للمقارنة في M16 ·
+    <span class="en">Ollama 0.40.6</span> + <span class="en">gemma4:e2b-it-qat</span> عشان نجرّب ببلاش (اتضاف 2026-10-20). Ollama بيفهم الـ Anthropic Messages API، بس مبيدعمش prompt caching ولا Batches ولا citations ولا <span class="en">count_tokens</span>، فالـ modules دي هتحتاج Claude نفسه.
+    المراجع: <a href="https://github.com/anthropics/anthropic-sdk-typescript/releases">SDK releases</a> · <a href="https://platform.claude.com/docs">Claude docs</a> · <a href="https://modelcontextprotocol.io/specification/2026-07-28">MCP spec</a> · <a href="https://github.com/pgvector/pgvector">pgvector</a>.
+  </div>
+
+  <div class="callout"><span class="eyebrow">اتغيّر في الإصدار الجديد (خلّي بالك من الـ tutorials القديمة)</span>
+    كتير من الشروحات على النت مكتوبة لـ models أقدم. في الـ models الحالية: <span class="en">temperature</span> و<span class="en">budget_tokens</span> و"الـ prefill" (إنك تبدأ رد الموديل بنفسك) بقوا بيرجّعوا error. الـ JSON المنظّم بقى بـ <span class="en">output_config.format</span>. والـ MCP في نسخة 2026-07-28 بقى stateless، يعني مفيش "handshake" في الأول. هنقف عند كل واحدة في الـ module بتاعها.</div>
+
+  <div class="callout"><span class="eyebrow">ليه TypeScript مش Python؟</span>
+    Python هي اللغة الأشهر في الـ AI. بس شغلنا هنا <b>backend</b> بيكلّم models جاهزة، مش تدريب models. والـ SDKs بتاعة TypeScript فيها نفس الحاجات بالظبط. كمان ده نفس الـ stack اللي بتتعلّمه في تراك TypeScript / Node / NestJS، فالاتنين هيسندوا بعض. وM16 هيبني الكلام ده جوّه NestJS.</div>
+
+  <h2>الحكاية في سطرين</h2>
+  <p>الـ LLM زي موظف جديد ذكي جدًا، بس بيألّف لما ميعرفش، ومبيفتكرش حاجة من امبارح، وبياخد أجرته بالكلمة. شغلك كـ backend engineer إنك تديله المعلومة الصح، وتراجع شغله بالأرقام، وتمنعه يعمل مصيبة، وتحسب تمنه.</p>
+
+  <!-- Level 1 -->
+  <div class="level">
+    <div class="level-head"><h2>المستوى 1 · Beginner: الـ LLM كـ API</h2><span class="pill">4 modules</span></div>
+    <ol class="modlist">
+      <li class="done"><div class="t">M1 · يعني إيه LLM؟ وأول request من الـ backend</div>
+        <div class="meta">next-token prediction، token، model، تكلفة input/output، hallucination — Chip Huyen <i class="en">AI Engineering</i> ف1–ف2، Alammar &amp; Grootendorst <i class="en">Hands-On LLMs</i> ف2، anthropics/courses (API fundamentals) · النجاح: أول call لـ Claude من Node، وتحسب تكلفة السؤال بالسنت، وتقيس كام إجابة مختلفة من 5 مرات</div> <span class="pill done">خلص 2026-10-21</span></li>
+      <li class="now"><div class="t">M2 · الـ prompt والمحادثة: الموديل مبيفتكرش</div>
+        <div class="meta">system prompt، messages وأدوار user/assistant، الـ API stateless (إنت اللي بتبعت المحادثة كلها كل مرة)، context window — Huyen ف5، anthropics/courses (Prompt engineering، Real-world prompting)، Claude docs (Prompt engineering) · النجاح: chat endpoint بيفتكر آخر 10 رسايل، وتقيس التكلفة بتزيد إزاي مع طول المحادثة</div></li>
+      <li><div class="t">M3 · Structured output: الرد يبقى JSON يدخل الكود</div>
+        <div class="meta">JSON schema، zod، <span class="en">messages.parse</span>، التحقق من الرد — Claude docs (Structured outputs)، Huyen ف5 · النجاح: classifier للـ support tickets بيرجّع JSON صح 50/50 مرة</div></li>
+      <li><div class="t">M4 · Streaming والأخطاء: الـ call في الـ production</div>
+        <div class="meta">streaming للـ UI، timeouts، retries، rate limits (429)، الـ refusal stop reason، fallbacks — Claude docs (Streaming, Errors, Rate limits) · النجاح: endpoint بيعمل stream، ولما تبعتله 50 request مرة واحدة ميقعش</div></li>
+    </ol>
+    <div class="passtest"><b>اختبار المستوى:</b> HTTP endpoint في Node بياخد شكوى زبون، يرجّع JSON متحقّق منه (النوع، الأولوية، ملخّص)، ويعمل stream لرد مقترح، ويستحمل 429 من غير ما يقع. وكل request بيطبع تكلفته.</div>
+  </div>
+
+  <!-- Level 2 -->
+  <div class="level">
+    <div class="level-head"><h2>المستوى 2 · Intermediate: الموديل يشتغل ببياناتك</h2><span class="pill">5 modules</span></div>
+    <ol class="modlist">
+      <li><div class="t">M5 · Tool use: الموديل يطلب من الكود بتاعك يعمل حاجة</div>
+        <div class="meta">function calling، <span class="en">tool_use</span> / <span class="en">tool_result</span>، <span class="en">strict</span>، parallel tools، الـ loop — Claude docs (Tool use)، anthropics/courses (Tool use)، Huyen ف6 · النجاح: bot يجاوب "طلبي فين؟" من الـ database بتاعتك مش من خياله</div></li>
+      <li><div class="t">M6 · Embeddings والبحث بالمعنى</div>
+        <div class="meta">embedding = أرقام بتمثّل المعنى، similarity، pgvector، index (HNSW) — Alammar ف2 وف8، pgvector docs، Huyen ف6 · النجاح: بحث يلاقي "عايز فلوسي ترجع" لما تكتب "refund"، وتقيس الـ latency بـ index ومن غيره على 100k صف</div></li>
+      <li><div class="t">M7 · RAG: تدي الموديل الورقة الصح قبل ما يجاوب</div>
+        <div class="meta">chunking، retrieval، hybrid search، reranking، citations، "مش عارف" لما المعلومة مش موجودة — Huyen ف6، Alammar ف8، Claude docs (Citations) · النجاح: bot لسياسات شركة، 0 إجابات مخترعة على 30 سؤال (يعني اللي حصل لـ Air Canada ميحصلش)</div></li>
+      <li><div class="t">M8 · Evals 1: إزاي تعرف إن الـ AI بتاعك شغّال؟</div>
+        <div class="meta">golden dataset، exact checks، error analysis (اقرا الـ logs الأول)، قياس قبل وبعد أي تغيير — Huyen ف3–ف4، Hamel Husain &amp; Shreya Shankar (error analysis)، anthropics/courses (Prompt evaluations) · النجاح: eval من 50 حالة بيطلّع رقم واحد، وتغيير prompt يحرّكه بالأرقام</div></li>
+      <li><div class="t">M9 · Evals 2: LLM-as-judge والـ evals في الـ CI</div>
+        <div class="meta">موديل بيصحّح موديل، إزاي تتأكد إن الحَكَم نفسه صح، recall@k للـ RAG، الـ eval يشتغل مع كل PR — Huyen ف3 (AI as a Judge)، hamel.dev · النجاح: judge بيتفق معاك في ≥ 90% من 40 حالة، والـ eval بيوقّف PR بيبوّظ الجودة</div></li>
+    </ol>
+    <div class="passtest"><b>اختبار المستوى:</b> RAG على docs حقيقية (مثلًا docs بتاعة Laravel أو NestJS) ومعاه eval من 50 سؤال: recall@5 ≥ 0.85، و0 إجابات مخترعة، ورقم الجودة بيتحسب أوتوماتيك.</div>
+  </div>
+
+  <!-- Level 3 -->
+  <div class="level">
+    <div class="level-head"><h2>المستوى 3 · Advanced: Agents والـ production</h2><span class="pill">5 modules</span></div>
+    <ol class="modlist">
+      <li><div class="t">M10 · التكلفة والسرعة: نفس الجودة بفلوس أقل</div>
+        <div class="meta">prompt caching، Batches (نص التمن)، اختيار الـ model والـ effort، قياس التكلفة لكل task — Claude docs (Prompt caching, Batch, Effort)، Huyen ف9 · النجاح: تقلّل تكلفة الـ RAG bot بـ ≥ 50% والـ eval مينزلش</div></li>
+      <li><div class="t">M11 · Agents: إمتى تسيب الموديل يقرّر الخطوة الجاية</div>
+        <div class="meta">workflow vs agent، prompt chaining، routing، orchestrator-workers، الـ agent loop، Tool Runner، حدود وميزانية — Anthropic <i class="en">Building effective agents</i>، Huyen ف6 (Agents)، Claude docs (Tool runner) · النجاح: agent بيحل تذكرة support من 4 خطوات، ومعاه سقف للتكلفة وعدد الخطوات</div></li>
+      <li><div class="t">M12 · MCP: الـ backend بتاعك يبقى أداة لأي AI</div>
+        <div class="meta">MCP server وclient، tools وresources، نسخة 2026-07-28 الـ stateless، OAuth — MCP spec، @modelcontextprotocol/sdk · النجاح: MCP server لـ orders API بتاعك، وClaude يستخدمه</div></li>
+      <li><div class="t">M13 · Security: prompt injection والحاجات اللي بتبوظ</div>
+        <div class="meta">prompt injection مباشر وغير مباشر، OWASP Top 10 for LLM Apps (2025)، صلاحيات الـ tools، PII، guardrails — OWASP GenAI، Huyen ف5 (Defensive prompt engineering) · النجاح: 20 هجمة injection على الـ agent، و0 منهم يعمل action خطر</div></li>
+      <li><div class="t">M14 · Observability: تشوف كل call حصل فيه إيه</div>
+        <div class="meta">tracing لكل call وtool، tokens وتكلفة لكل user، OpenTelemetry GenAI conventions، Langfuse — OTel GenAI semantic conventions، Huyen ف10 · النجاح: تلاقي أغلى request وأبطأ خطوة من الـ trace في أقل من 5 دقايق</div></li>
+    </ol>
+    <div class="passtest"><b>اختبار المستوى:</b> support agent بـ tools وMCP: الـ eval فوق الحد، و0 injection نجحت، وdashboard بيقول التكلفة لكل تذكرة.</div>
+  </div>
+
+  <!-- Level 4 -->
+  <div class="level">
+    <div class="level-head"><h2>المستوى 4 · Professional: architecture وقرارات</h2><span class="pill">5 modules</span></div>
+    <ol class="modlist">
+      <li><div class="t">M15 · Architecture لـ AI features</div>
+        <div class="meta">AI gateway، queues للشغل الطويل، workers، fallbacks بين models، cache للردود، rate limit لكل user — Huyen ف10، Claude docs (Fallbacks) · النجاح: ADR لـ feature AI في نظام حقيقي، فيه "إيه اللي يقع الأول"</div></li>
+      <li><div class="t">M16 · AI جوّه NestJS</div>
+        <div class="meta">AI module وservices وDI، streaming من controller، مقارنة الـ SDK الرسمي بـ Vercel AI SDK (provider-agnostic) — NestJS docs، ai-sdk.dev · النجاح: نقل الـ RAG bot لـ Nest بالـ tests بتاعته (بيربط بتراك TS/Nest)</div></li>
+      <li><div class="t">M17 · Fine-tuning والـ data: إمتى تحتاجه (وغالبًا لأ)</div>
+        <div class="meta">prompt vs RAG vs fine-tune، synthetic data للـ evals، data curation — Huyen ف7–ف8 · النجاح: قرار مكتوب ومبرّر لـ 3 سيناريوهات</div></li>
+      <li><div class="t">M18 · Open models وself-hosting</div>
+        <div class="meta">Ollama وvLLM كفكرة، quantization، إمتى تشغّل model بنفسك (خصوصية، تكلفة، latency) — Huyen ف9 · النجاح: تشغّل model صغير محلي وتقارن جودة وتكلفة بنفس الـ eval</div></li>
+      <li><div class="t">M19 · Capstone وinterview</div>
+        <div class="meta">feature كاملة: من الـ requirements للـ eval للـ deploy، وmock interview "صمّم AI support system" · النجاح: مشروع شغّال + ADR + تشرح كل قرار بالأرقام</div></li>
+    </ol>
+    <div class="passtest"><b>اختبار المستوى:</b> mock interview 45 دقيقة على AI system جديد، ومشروع الـ capstone تشرحه بالأرقام (جودة، تكلفة، latency، أمان).</div>
+  </div>
+
+  <h2>المصادر</h2>
+  <ul>
+    <li>Chip Huyen — <i class="en">AI Engineering: Building Applications with Foundation Models</i> (O'Reilly, ديسمبر 2024). المرجع الأساسي للمفاهيم. أسامي الـ models فيه قديمة، والـ APIs خدها من الـ docs. <a href="https://github.com/chiphuyen/aie-book">aie-book (الفهرس)</a></li>
+    <li>Jay Alammar &amp; Maarten Grootendorst — <i class="en">Hands-On Large Language Models</i> (O'Reilly, 2024): رسومات ممتازة للـ tokens والـ embeddings (ف2، ف8)</li>
+    <li><a href="https://platform.claude.com/docs">Claude Developer Platform docs</a> — المرجع لأي API (نسخة الـ SDK 0.135.0)</li>
+    <li><a href="https://github.com/anthropics/courses">anthropics/courses</a>: API fundamentals، Prompt engineering، Real-world prompting، Prompt evaluations، Tool use. الكورسات دي بتستخدم models قديمة، فالكود هنا هيبقى على الـ models الحالية.</li>
+    <li>Anthropic — <a href="https://www.anthropic.com/engineering/building-effective-agents"><i class="en">Building effective agents</i></a> (للـ M11)</li>
+    <li>Hamel Husain &amp; Shreya Shankar — <a href="https://hamel.dev/notes/llm/ai-product-engineering/evals-error-analysis.html">error analysis والـ evals</a> + كورس <i class="en">AI Evals for Engineers &amp; PMs</i></li>
+    <li><a href="https://modelcontextprotocol.io/specification/2026-07-28">MCP specification 2026-07-28</a></li>
+    <li><a href="https://genai.owasp.org/llm-top-10/">OWASP Top 10 for LLM Applications 2025</a></li>
+    <li><a href="https://github.com/pgvector/pgvector">pgvector</a> · <a href="https://opentelemetry.io/docs/specs/semconv/gen-ai/">OpenTelemetry GenAI semantic conventions</a></li>
+    <li>Roadmaps الـ community اللي اتقارنت: <a href="https://roadmap.sh/ai-engineer">roadmap.sh/ai-engineer</a> · <a href="https://codebasics.io/blog/software-engineer-to-ai-engineer-complete-roadmap-for-2026">Codebasics — SWE to AI Engineer 2026</a> · <a href="https://www.louisbouchard.ai/how-to-learn-ai-engineering-2026/">Louis-François Bouchard — How to learn AI engineering 2026</a></li>
+  </ul>
+  <p class="muted" style="font-size:14.5px">إزاي اتعملت الخطة: الحاجات اللي كل المصادر متفقة عليها بقت العمود الفقري (prompting، structured output، tool use، RAG، evals، agents، التكلفة، الأمان، الـ observability). والحاجات اللي مصدر أو اتنين بس بيقولوها (fine-tuning، self-hosting) بقت في المستوى الأخير وبحجم أصغر، عشان شغل الـ backend نادرًا ما بيحتاجها.</p>
+</section>
+
+<!-- ============ M1 ============ -->
+<section id="m1" role="tabpanel" hidden>
+  <span class="eyebrow">المستوى 1 · Module 1</span>
+  <h2 style="margin-top:6px">يعني إيه LLM؟ وأول request من الـ backend</h2>
+
+  <div class="opener">
+    <div>
+      <span class="eyebrow">الحكاية (قضية حقيقية، 2024)</span>
+      <p>راجل في كندا جدّته ماتت، وكان لازم يسافر بسرعة. سأل الـ chatbot بتاع شركة الطيران: "لو حجزت دلوقتي بالسعر العادي، أقدر آخد خصم الوفاة بعدين؟"</p>
+      <p>الـ chatbot قاله بكل ثقة: "أيوه، قدّم خلال 90 يوم". الراجل حجز. وبعدين الشركة قالتله: السياسة دي مش موجودة أصلًا.</p>
+      <p>راح المحكمة وكسب. المحكمة قالت: الـ chatbot ده بتاعكم، يبقى إنتوا مسؤولين عن كلامه.</p>
+    </div>
+    <div class="teaser">ليه الـ chatbot يقول معلومة غلط وهو واثق كده؟ ومين اللي كان المفروض يمنع ده: الموديل، ولا الـ backend؟</div>
+    <div>
+      <span class="eyebrow">خط النهاية (تقدير)</span>
+      <div class="finish">
+        <div class="stat bad"><span class="big">؟</span><div class="lbl">دلوقتي: مش عارف السؤال الواحد بيكلّف كام، ولا ليه الإجابة بتتغيّر</div></div>
+        <div class="stat good"><span class="big">$0.004</span><div class="lbl">بعد الـ module: أول call لـ Claude من Node، وتحسب تمنه بنفسك (تقدير لسؤال قصير)</div></div>
+        <div class="stat good"><span class="big">5/5</span><div class="lbl">نفس السؤال 5 مرات، وتقيس كام إجابة طلعت مختلفة (تقدير)</div></div>
+      </div>
+    </div>
+    <div>
+      <span class="eyebrow">هتقدر...</span>
+      <ul class="cando">
+        <li class="ok">تجاوب في interview: "يعني إيه token، وليه بيفرق في الفاتورة؟"</li>
+        <li class="ok">تشرح لمدير المنتج ليه الـ chatbot ممكن "يألّف"، وإن الحل في الـ backend مش في الدعاء</li>
+        <li class="ok">تعمل أول خطوة من اختبار المستوى 1: call حقيقي بيطبع تكلفته</li>
+      </ul>
+    </div>
+    <div>
+      <span class="eyebrow">إنت فين</span>
+      <div class="map">
+        <span class="lv">Beginner</span><span class="here">M1</span><span>M2</span><span>M3</span><span>M4</span>
+        <span class="lv">Intermediate</span><span>M5</span><span>M6</span><span>M7</span><span>M8</span><span>M9</span>
+        <span class="lv">Advanced</span><span>M10</span><span>M11</span><span>M12</span><span>M13</span><span>M14</span>
+        <span class="lv">Pro</span><span>M15</span><span>M16</span><span>M17</span><span>M18</span><span>M19</span>
+      </div>
+    </div>
+    <p class="muted" style="margin:0">الحجم: 5 أفكار صغيرة + 4 tasks في الـ lab · حوالي ساعتين على كذا قعدة.</p>
+  </div>
+
+  <p class="muted">كل الكلمات الجديدة متجمّعة في <a href="#m1-glossary">قاموس في آخر الصفحة</a>.</p>
+
+  <!-- Step 1 -->
+  <div class="step">
+    <span class="step-n">الفكرة 1</span>
+    <h3>الكيبورد بتاع موبايلك، بس عملاق</h3>
+    <p>لما بتكتب على الموبايل "أنا رايح"، الكيبورد بيقترح 3 كلمات: "البيت"، "الشغل"، "النادي". هو مش فاهم إنت رايح فين. هو بس شاف الكلام ده كتير قبل كده، فبيخمّن الكلمة اللي غالبًا جاية.</p>
+    <p>دلوقتي تخيّل كيبورد اتعلّم من كمية نصوص مهولة. ولما يختار كلمة، يحطّها ويخمّن اللي بعدها، وهكذا لحد ما يكتب فقرة كاملة.</p>
+    <p class="keyline">الكيبورد العملاق ده اسمه <span class="en">LLM</span> (Large Language Model). Claude وChatGPT وGemini كلهم كده.</p>
+    <figure>
+      <svg viewBox="0 0 620 170" role="img" aria-label="الـ LLM بياخد الكلام، يخمّن احتمالات الكلمة الجاية، يختار واحدة، ويضيفها ويرجع يخمّن تاني">
+        <defs><marker id="ar1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="var(--muted)"/></marker></defs>
+        <rect x="10" y="55" width="130" height="50" rx="10" class="fig-acc"/><text x="75" y="85" text-anchor="middle">"أنا رايح"</text>
+        <rect x="210" y="45" width="110" height="70" rx="10" class="fig-box"/><text x="265" y="85" text-anchor="middle" class="m">LLM</text>
+        <rect x="390" y="20" width="120" height="30" rx="6" class="fig-ok"/><text x="450" y="40" text-anchor="middle">البيت 40%</text>
+        <rect x="390" y="65" width="120" height="30" rx="6" class="fig-box"/><text x="450" y="85" text-anchor="middle">الشغل 35%</text>
+        <rect x="390" y="110" width="120" height="30" rx="6" class="fig-box"/><text x="450" y="130" text-anchor="middle">النادي 25%</text>
+        <path d="M142 80 H206" class="fig-line" marker-end="url(#ar1)"/>
+        <path d="M322 80 H386" class="fig-line" marker-end="url(#ar1)"/>
+        <path d="M512 35 C600 35 600 160 300 160 C100 160 75 140 75 108" class="fig-line" stroke-dasharray="5 4" marker-end="url(#ar1)"/>
+        <text x="560" y="100" text-anchor="middle" class="mut">ضيفها وخمّن تاني</text>
+      </svg>
+      <figcaption>كل خطوة: خمّن الكلمة الجاية، اختار واحدة، ضيفها للكلام، وارجع خمّن تاني.</figcaption>
+    </figure>
+    <div class="check"><b>اتأكد إنك فهمت:</b> الـ LLM في كل خطوة بيعمل إيه بالظبط؟
+      <details><summary>الإجابة</summary>بيخمّن الحتة اللي غالبًا جاية بعد الكلام اللي قدّامه، ويضيفها، ويكرّر. هو مش بيدوّر على "الإجابة الصح" في مكان. هو بيكمّل الكلام بالشكل اللي شافه كتير.</details></div>
+  </div>
+
+  <!-- Step 2 -->
+  <div class="step">
+    <span class="step-n">الفكرة 2</span>
+    <h3>مش بيقرا كلمات، بيقرا حتت</h3>
+    <p>الـ LLM مش بيشوف الكلمة كاملة. بيقطّعها حتت صغيرة، زي ما بتقطّع ساندويتش طويل عشان يدخل بُقّك. كلمة سهلة ومشهورة ممكن تبقى حتة واحدة. وكلمة طويلة أو نادرة بتبقى كذا حتة.</p>
+    <p class="keyline">الحتة دي اسمها <span class="en">token</span>.</p>
+    <figure>
+      <svg viewBox="0 0 600 130" role="img" aria-label="كلمة refund حتة واحدة، وكلمة unbelievable 3 حتت">
+        <text x="20" y="35" class="m">refund</text>
+        <rect x="170" y="15" width="90" height="32" rx="6" class="fig-ok"/><text x="215" y="36" text-anchor="middle" class="m">refund</text>
+        <text x="300" y="36" class="mut">حتة واحدة</text>
+        <text x="20" y="95" class="m">unbelievable</text>
+        <rect x="170" y="75" width="50" height="32" rx="6" class="fig-acc"/><text x="195" y="96" text-anchor="middle" class="m">un</text>
+        <rect x="225" y="75" width="80" height="32" rx="6" class="fig-acc"/><text x="265" y="96" text-anchor="middle" class="m">believ</text>
+        <rect x="310" y="75" width="60" height="32" rx="6" class="fig-acc"/><text x="340" y="96" text-anchor="middle" class="m">able</text>
+        <text x="400" y="96" class="mut">3 حتت</text>
+      </svg>
+      <figcaption>التقطيع ده مثال للتوضيح. كل model بيقطّع بطريقته، والرقم الحقيقي بتعرفه من الـ API.</figcaption>
+    </figure>
+    <p>قاعدة تقريبية: في الإنجليزي كل token حوالي 4 حروف. والعربي غالبًا بياخد tokens أكتر لنفس المعنى. هتعرف ليه ده مهم في الفكرة 4.</p>
+    <div class="check"><b>اتأكد إنك فهمت:</b> جملة فيها 10 كلمات إنجليزي، هتبقى بالظبط 10 tokens؟
+      <details><summary>الإجابة</summary>مش شرط. ممكن تبقى أكتر، لأن الكلمات الطويلة أو النادرة بتتقطّع كذا token. والعلامات زي النقطة والفصلة بتتحسب tokens كمان.</details></div>
+  </div>
+
+  <!-- Step 3 -->
+  <div class="step">
+    <span class="step-n">الفكرة 3</span>
+    <h3>الـ backend بيكلّمه زي أي API</h3>
+    <p>الـ LLM مش بيشتغل جوّه السيرفر بتاعك. هو قاعد عند الشركة اللي عملته، والـ backend بتاعك بيبعتله request على الإنترنت، زي ما بتكلّم أي API تاني (Stripe أو Firebase مثلًا). بتبعت السؤال، وبيرجعلك الرد ومعاه عدد الـ tokens.</p>
+    <p>الشركة الواحدة عندها كذا "مخ"، فيه الكبير الشاطر الغالي، وفيه الصغير السريع الرخيص. وإنت بتقول في كل request عايز أنهي واحد.</p>
+    <p class="keyline">الـ "مخ" اللي بتختاره ده اسمه <span class="en">model</span>، زي <span class="en">claude-opus-5-5</span>.</p>
+    <figure>
+      <svg viewBox="0 0 620 160" role="img" aria-label="السيرفر بتاعك يبعت POST فيه الـ model والسؤال، ويرجعله الرد وعدد الـ tokens">
+        <defs><marker id="ar3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="var(--muted)"/></marker></defs>
+        <rect x="10" y="45" width="150" height="70" rx="10" class="fig-acc"/><text x="85" y="78" text-anchor="middle">السيرفر بتاعك</text><text x="85" y="98" text-anchor="middle" class="m mut">Node</text>
+        <rect x="460" y="45" width="150" height="70" rx="10" class="fig-box"/><text x="535" y="78" text-anchor="middle" class="m">Anthropic API</text><text x="535" y="98" text-anchor="middle" class="mut">فيه الـ models</text>
+        <path d="M164 62 H456" class="fig-line" marker-end="url(#ar3)"/>
+        <text x="310" y="30" text-anchor="middle" class="m">POST /v1/messages</text>
+        <text x="310" y="52" text-anchor="middle" class="m mut">{ model, messages }</text>
+        <path d="M456 100 H164" class="fig-line" marker-end="url(#ar3)"/>
+        <text x="310" y="122" text-anchor="middle" class="m mut">{ content, usage }</text>
+        <text x="310" y="145" text-anchor="middle" class="mut">الرد + عدد الـ tokens</text>
+      </svg>
+      <figcaption>request رايح فيه اسم الـ model والسؤال، وresponse راجع فيه الرد والـ tokens اللي اتصرفت.</figcaption>
+    </figure>
+    <p>وده شكله بالكود، بالـ SDK الرسمي في TypeScript:</p>
+<pre>import Anthropic from "@anthropic-ai/sdk";
+const client = new Anthropic();
+const res = await client.messages.create({
+  model: "claude-opus-5-5",
+  max_tokens: 1000,
+  messages: [{ role: "user", content: "What is a refund?" }],
+});</pre>
+    <p>بص على حاجتين بس: <code>model</code> هو المخ اللي اخترته، و<code>messages</code> هو الكلام اللي بتبعته. و<code>max_tokens</code> هو أقصى طول للرد.</p>
+    <p class="muted" style="font-size:14px">الكود ده اتعمله type-check على <span class="en">@anthropic-ai/sdk 0.135.0</span> ووصل للـ API فعلًا. هيشتغل عندك كامل أول ما تحط الـ API key في Task 2.</p>
+    <div class="lv-box"><span class="lv-tag">من Laravel</span>نفس فكرة <code>Http::post('https://api.stripe.com/...', [...])</code>. الفرق إن الـ SDK بيلفّ الـ HTTP ده في function جاهزة، وبيعمل retry لوحده لو النت قطع.</div>
+    <div class="check"><b>اتأكد إنك فهمت:</b> لو غيّرت <code>model</code> من الكبير للصغير، إيه اللي هيتغيّر وإيه اللي هيفضل زي ما هو؟
+      <details><summary>الإجابة</summary>الكود نفسه هيفضل زي ما هو، كلمة واحدة بس اتغيّرت. اللي هيتغيّر هو جودة الرد وسرعته وتمنه. واختيار الـ model ده قرار هنتعلّم ناخده بالأرقام في M10.</details></div>
+  </div>
+
+  <!-- Step 4 -->
+  <div class="step">
+    <span class="step-n">الفكرة 4</span>
+    <h3>بتدفع بالعدّاد</h3>
+    <p>تخيّل تاكسي بعدّاد غريب: بتدفع على كل كلمة إنت بتقولها للسوّاق، وبتدفع أكتر بكتير على كل كلمة هو بيردّ بيها.</p>
+    <p class="keyline">الـ tokens اللي إنت بتبعتها اسمها <span class="en">input tokens</span>، واللي الموديل بيكتبها اسمها <span class="en">output tokens</span>. وكل نوع ليه سعر.</p>
+    <div class="tablewrap"><table>
+      <tr><th>الـ model</th><th>input (لكل مليون token)</th><th>output (لكل مليون token)</th></tr>
+      <tr><td class="en">claude-opus-5-5</td><td class="num">$4</td><td class="num">$20</td></tr>
+      <tr><td class="en">claude-haiku-5-5</td><td class="num">$0.10</td><td class="num">$0.50</td></tr>
+    </table></div>
+    <p class="muted" style="font-size:14px">الأسعار دي من جدول الأسعار الرسمي (أكتوبر 2026). شوف إن الـ output أغلى 5 مرات من الـ input.</p>
+    <p>حسبة سؤال واحد قصير على Opus: 20 token رايحين و200 راجعين.</p>
+    <figure>
+      <svg viewBox="0 0 620 120" role="img" aria-label="20 input token تكلفتهم 0.00008 دولار، و200 output token تكلفتهم 0.004 دولار، والمجموع 0.00408 دولار">
+        <rect x="10" y="20" width="170" height="60" rx="8" class="fig-box"/><text x="95" y="45" text-anchor="middle" class="m">20 × $4 / 1M</text><text x="95" y="67" text-anchor="middle" class="m mut">= $0.00008</text>
+        <text x="205" y="55" text-anchor="middle" class="m">+</text>
+        <rect x="230" y="20" width="190" height="60" rx="8" class="fig-bad"/><text x="325" y="45" text-anchor="middle" class="m">200 × $20 / 1M</text><text x="325" y="67" text-anchor="middle" class="m">= $0.004</text>
+        <text x="445" y="55" text-anchor="middle" class="m">=</text>
+        <rect x="470" y="20" width="140" height="60" rx="8" class="fig-acc"/><text x="540" y="56" text-anchor="middle" class="m">$0.00408</text>
+        <text x="325" y="105" text-anchor="middle" class="mut">الرد هو اللي بيكلّف</text>
+      </svg>
+      <figcaption>معظم الفلوس راحت في الرد، مش في السؤال.</figcaption>
+    </figure>
+    <p>رقم صغير؟ لو عندك 100,000 سؤال في اليوم، يبقى حوالي <b class="num">$408</b> في اليوم. عشان كده الـ backend engineer لازم يعرف يحسبها.</p>
+    <div class="check"><b>اتأكد إنك فهمت:</b> عندك طريقتين لنفس الـ feature: الأولى بتبعت 1000 token وبترجّع 50، والتانية بتبعت 100 وبترجّع 500. أنهي أرخص على Opus؟
+      <details><summary>الإجابة</summary>الأولى: 1000×4 + 50×20 = 5,000 وحدة. التانية: 100×4 + 500×20 = 10,400 وحدة. يعني الأولى أرخص بحوالي النص، مع إنها بتبعت كلام أكتر بـ 10 مرات. السبب إن الـ output أغلى بكتير.</details></div>
+  </div>
+
+  <!-- Step 5 -->
+  <div class="step">
+    <span class="step-n">الفكرة 5</span>
+    <h3>كل مرة بيخمّن من الأول</h3>
+    <p>الـ function العادية في الكود بتاعك: نفس الـ input، يبقى نفس الـ output، كل مرة. الـ LLM مش كده. هو بيرمي "زهر" وهو بيختار الكلمة الجاية، فنفس السؤال ممكن ياخد إجابة مختلفة كل مرة.</p>
+    <p>والأخطر: لما يركّب حتت شافها قبل كده، ممكن يطلع بجملة شكلها مظبوط جدًا، بس هي غلط. هو مش "بيكدب". هو بس بيكمّل الكلام بالشكل المعتاد.</p>
+    <p class="keyline">الإجابة الغلط اللي بتطلع بثقة دي اسمها <span class="en">hallucination</span>.</p>
+    <figure>
+      <svg viewBox="0 0 620 190" role="img" aria-label="الشمال: function عادية نفس الـ input بيدي نفس الـ output. اليمين: LLM نفس السؤال بيدي إجابات مختلفة وواحدة منهم غلط">
+        <text x="150" y="20" text-anchor="middle">function عادية</text>
+        <rect x="30" y="40" width="90" height="36" rx="6" class="fig-box"/><text x="75" y="63" text-anchor="middle" class="m">add(2,3)</text>
+        <rect x="180" y="40" width="90" height="36" rx="6" class="fig-ok"/><text x="225" y="63" text-anchor="middle" class="m">5</text>
+        <rect x="30" y="90" width="90" height="36" rx="6" class="fig-box"/><text x="75" y="113" text-anchor="middle" class="m">add(2,3)</text>
+        <rect x="180" y="90" width="90" height="36" rx="6" class="fig-ok"/><text x="225" y="113" text-anchor="middle" class="m">5</text>
+        <text x="150" y="160" text-anchor="middle" class="mut">دايمًا نفس النتيجة</text>
+        <line x1="310" y1="15" x2="310" y2="175" class="fig-line" stroke-dasharray="3 4"/>
+        <text x="470" y="20" text-anchor="middle">LLM</text>
+        <rect x="322" y="40" width="120" height="36" rx="6" class="fig-box"/><text x="382" y="63" text-anchor="middle">مدة الـ refund؟</text>
+        <rect x="322" y="90" width="120" height="36" rx="6" class="fig-box"/><text x="382" y="113" text-anchor="middle">مدة الـ refund؟</text>
+        <rect x="460" y="40" width="148" height="36" rx="6" class="fig-ok"/><text x="530" y="63" text-anchor="middle">3 أيام ✓</text>
+        <rect x="460" y="90" width="148" height="36" rx="6" class="fig-bad"/><text x="530" y="113" text-anchor="middle">7 أيام ✗ (بثقة)</text>
+        <text x="470" y="160" text-anchor="middle" class="mut">نفس السؤال، إجابات مختلفة</text>
+      </svg>
+      <figcaption>الفرق اللي هيغيّر طريقة شغلك: مع الـ LLM مينفعش تجرّب مرة واحدة وتقول "شغّال".</figcaption>
+    </figure>
+    <div class="check"><b>اتأكد إنك فهمت:</b> لو سألت الـ LLM نفس السؤال مرة وطلعت الإجابة صح، ينفع تقول إن الـ feature شغّالة؟
+      <details><summary>الإجابة</summary>لأ. مرة واحدة صح ممكن تكون حظ. لازم تجرّب على حالات كتير وتعدّ كام مرة صح. والطريقة دي اسمها evals، وهنبنيها في M8.</details></div>
+  </div>
+
+  <h2>غلطات مشهورة</h2>
+  <ul>
+    <li>تجرّب الـ prompt مرة واحدة، تطلع حلوة، فتنزّلها production.</li>
+    <li>تنسى إن الـ output أغلى، فتسيب الموديل يكتب ردود طويلة مالهاش لازمة.</li>
+    <li>تعامل كلام الموديل على إنه حقيقة، وتعرضه للزبون من غير ما تدّيله مصدر أو تتحقق منه.</li>
+    <li>تحط الـ API key في الكود أو ترفعه على GitHub.</li>
+    <li>تاخد <code>res.content[0].text</code> على طول. مع الـ models اللي بتفكّر، أول block بيبقى <code>thinking</code> مش الإجابة. دوّر على الـ block اللي نوعه <code>"text"</code> (إنت عملتها صح في Task 2).</li>
+    <li>تحط <code>max_tokens</code> صغير قوي مع model بيفكّر، فالرد يطلع فاضي وإنت دافع تمنه. ده اللي لقيته في Task 4. وبص دايمًا على <code>stop_reason</code>.</li>
+    <li>تقارن إجابات الموديل حرف بحرف. في Task 3 الـ 5 إجابات كان معناهم واحد، والكود قال 5/5 مختلفين.</li>
+  </ul>
+
+  <h2>الـ Tasks في الـ lab</h2>
+  <div class="lab-box">الـ lab في <code>Labs/ai-eng-lab</code> · الـ README فيه كل الأوامر · <span class="en">Node 26 + @anthropic-ai/sdk 0.135.0</span></div>
+  <div class="tasks">
+    <div class="task"><span class="rung">Task 1 · مثال محلول</span><div>
+      <b>"LLM" لعبة من غير AI خالص:</b> ملف <code>src/m1/task-1/toy-predictor.ts</code> بيتعلّم من 6 جمل صغيرة إيه الكلمة اللي بتيجي بعد إيه، وبعدين يكتب جمل لوحده.
+      اقرا الملف، وقبل ما تشغّله اكتب توقّعك للـ 3 أسئلة دول:
+      <ol>
+        <li>لو شغّلت <code>npm run m1:t1</code>، الـ 5 مرات هيطلعوا نفس الجملة؟</li>
+        <li>ممكن يكتب جملة <b>مش موجودة</b> في النص اللي اتعلّم منه؟</li>
+        <li>في <code>npm run m1:t1:greedy</code> (دايمًا ياخد الكلمة الأكتر احتمالًا)، الـ 5 هيبقوا زي بعض؟ وهيبقوا صح؟</li>
+      </ol>
+      <details><summary>النتيجة الحقيقية (افتحها بعد ما تتوقّع وتشغّل)</summary>
+<pre>Prompt: "the refund"  mode: sampling (roll the dice)
+  run 1: the refund needs an address .      [NEW - never written anywhere]
+  run 2: the refund takes 3 days .          [in the training text]
+  run 3: the refund is on the way .         [NEW - never written anywhere]
+  run 4: the refund takes 7 days .          [NEW - never written anywhere]
+  ...
+mode: greedy
+  run 1..5: the refund takes 7 days .       [NEW - never written anywhere]</pre>
+        الـ sampling بيطلّع جمل مختلفة كل مرة، وكتير منها جديد. والـ greedy ثابت 5 مرات، بس ثابت على جملة <b>غلط</b>: النص بيقول الـ refund بياخد 3 أيام. يعني الثبات مش معناه الصح.
+        <p><b>ليه الـ greedy بيقول "7"؟</b> هو بيشوف آخر كلمة بس. لما يوصل لـ "takes" بيكون نسي إن الكلام عن الـ refund. بعد "takes" فيه "7" بـ 50% و"3" بـ 50%. والكود في حالة التعادل بياخد أول واحد قابله، و"7" جاية الأول في النص (في سطر الـ delivery). فكل مرة: <span class="en">takes → 7</span>.</p>
+      </details>
+    </div><span class="pill done">خلص</span></div>
+    <div class="task"><span class="rung">Task 2 · كمّل الناقص</span><div><b>أول call حقيقي لـ LLM:</b> ببلاش على جهازك بـ Ollama (<code>ollama serve</code> لازم يبقى شغّال)، والـ model <span class="en">gemma4:e2b-it-qat</span>. Ollama بيفهم نفس شكل الـ API بتاع Claude، فنفس الكود ده هيشتغل على Claude بعدين لو حطّيت API key (الـ API key زي باسورد لحسابك عند Anthropic). كمّل الـ 3 <code>TODO(task-2)</code> في <code>src/m1/task-2/first-call.ts</code>: تبعت السؤال، وتطبع الرد، وتطبع الـ <code>usage</code>. وبعدين <code>npm run m1:t2</code>.
+      <p><b>قبل ما تشغّل، توقّع:</b> السؤال ده كام input token تقريبًا؟ وكام output token؟</p></div><span class="pill done">خلص</span></div>
+    <div class="task"><span class="rung">Task 3 · من الصفر، 20 دقيقة</span><div><b>حاسبة التكلفة:</b> اكتب <code>costUsd</code> و<code>countDistinct</code> في <code>src/m1/task-3/cost.ts</code> من غير ما تبص على Task 2. فيه 8 tests جاهزين (<code>npm run m1:t3:test</code>). وبعدين <code>npm run m1:t3</code> بيسأل نفس السؤال 5 مرات، ويقولك كل call كان هيكلّف كام على Claude، وكام إجابة طلعت مختلفة.
+      <p><b>قبل ما تشغّل <code>m1:t3</code>، توقّع:</b> من الـ 5 إجابات، كام واحدة هتطلع مختلفة؟</p></div><span class="pill done">خلص</span></div>
+    <div class="task"><span class="rung">Task 4 · Bug hunt</span><div>endpoint صغير لخدمة العملاء (<code>src/m1/task-4</code>). الزباين بيشتكوا إنهم كتير بياخدوا رد <b>فاضي</b>، والـ <code>/stats</code> بيقول إننا بندفع على كل call. مش هقولك فين المشكلة. شغّل <code>npm run m1:t4:server</code> و<code>npm run m1:t4:load</code>، ولاقيها من الأعراض، وصلّحها، وقيس قبل وبعد.
+      <details><summary>الحل (بعد ما تخلّص)</summary>الـ bug كان <code>maxTokens: 256</code> في <code>config.ts</code>. الموديل بيفكّر الأول، فكان بيخلّص الـ 256 token وهو لسه بيفكّر، والـ API بيوقّفه قبل ما يكتب الإجابة. الـ tokens اللي اتكتبت (حتى التفكير) بتتحسب output وبتتدفع. والتصليح الأكمل: تزوّد السقف، <b>وكمان</b> تبص على <code>stop_reason</code>. لو طلع <code>"max_tokens"</code> يبقى الرد اتقطع، فمترجّعش للزبون رد فاضي أو ناقص من غير ما تعرف.</details></div><span class="pill done">خلص</span></div>
+  </div>
+
+  <h2>سجل الأدلة</h2>
+  <div class="tablewrap"><table>
+    <tr><th>الـ task</th><th>التاريخ</th><th>النتيجة</th></tr>
+    <tr><td>Task 1 · توقّع 1 (الـ sampling بيطلّع نفس الجملة؟)</td><td>2026-10-20</td><td>✓ توقّع "لأ" وطلع صح</td></tr>
+    <tr><td>Task 1 · توقّع 2 (ممكن يكتب جملة جديدة؟)</td><td>2026-10-20</td><td>✗ كان متوقّع "من الموجود بس"، والتشغيل طلّع جمل جديدة. وده بالظبط الـ hallucination</td></tr>
+    <tr><td>Task 1 · توقّع 3 (الـ greedy)</td><td>2026-10-20</td><td>شغّل الأول من غير توقّع، وشاف الـ 5 زي بعض بس مكانش فاهم ليه. اتشرح بالرسمة: الـ greedy بيشوف آخر كلمة بس وبياخد الأعلى، والتعادل 50/50 بيروح لـ "7"</td></tr>
+    <tr><td>Task 1 · سؤال تأكد (نقلنا سطر الـ refund لأول النص)</td><td>2026-10-20</td><td>✓ "هيطلع 3 أيام". صح، بس بالصدفة بتاعة الترتيب، مش لأنه فهم</td></tr>
+    <tr><td>Task 2 · توقّع الـ tokens</td><td>2026-10-20</td><td>input: توقّع حوالي 15، والحقيقي 33 أول مرة (الـ API بيضيف tokens "تغليف"). output: مكانش عارف يتوقّع، والحقيقي 370، منهم حوالي 140 بس للإجابة والباقي تفكير الموديل</td></tr>
+    <tr><td>Task 2 · الكود (review 1)</td><td>2026-10-20</td><td>الـ call صح والـ type-check عدّى، وشغّال في 6.7 ثانية. ناقص: أرقام الـ usage بتتطبع من غير labels (<code>5</code> و<code>370</code> لوحدهم)، فمش واضح مين input ومين output. محتاج يتصلّح</td></tr>
+    <tr><td>Task 2 · بعد التصليح</td><td>2026-10-20</td><td>✓ الـ labels اتضافت. زوّد كلمة "how" في السؤال، فالـ input بقى 34 بدل 33، يعني كلمة واحدة = token واحد. والـ output 447 (حوالي 105 كلمة إجابة والباقي تفكير). <b>Task 2 خلص</b></td></tr>
+    <tr><td>Task 3 · الكود</td><td>2026-10-21</td><td>✓ 8/8 tests والـ type-check عدّى. <code>costUsd</code> مظبوطة. <code>countDistinct</code> صح، بس ممكن تتكتب أبسط بـ <code>Set</code>. الوقت: حوالي 29 دقيقة من مواعيد حفظ الملفات (تقدير، الهدف كان 20)</td></tr>
+    <tr><td>Task 3 · التجربة (5 مرات)</td><td>2026-10-21</td><td>5/5 مختلفين لو قارنت النص حرف بحرف، بس الـ 5 بيقولوا <b>نفس المعنى</b> ("بيعتمد على المتجر وطريقة الدفع"). الـ output من 231 لـ 326 token لجملة واحدة حوالي 15 token، يعني أكتر من 90% تفكير. التكلفة لو على Opus من $0.0046 لـ $0.0065 للـ call، والمجموع $0.02798</td></tr>
+    <tr><td>Task 4 · قبل التصليح</td><td>2026-10-21</td><td>8 ردود فاضية من 10 (في تشغيلي كانوا 9). كل call بالظبط <code>out=256</code>، والتكلفة $0.052592</td></tr>
+    <tr><td>Task 4 · السبب</td><td>2026-10-21</td><td>✓ لقاه من الأعراض: <code>chars=0</code> عشان مفيش text block، و<code>max_tokens</code> صغير فالموديل بيخلّص في التفكير. التصحيح: الموديل مش "مبيستناش". الـ API بيوقّف الكتابة عند السقف، وكل الـ tokens اللي اتكتبت (حتى التفكير) بتتحاسب</td></tr>
+    <tr><td>Task 4 · بعد التصليح (<code>maxTokens: 1000</code>)</td><td>2026-10-21</td><td>✓ 0 ردود فاضية من 20 call. المتوسط 664 output token للـ call، والتكلفة $0.0134 للـ call بدل $0.0053. يعني 2.5× أغلى، بس كل زبون أخد رد. ناقص: لسه مفيش check على <code>stop_reason</code></td></tr>
+  </table></div>
+
+  <h2>اختبر نفسك</h2>
+  <details><summary>الـ LLM بيجيب الإجابة منين؟</summary>مش بيجيبها من مكان. بيخمّن token ورا token بالشكل اللي شافه كتير وهو بيتعلّم.</details>
+  <details><summary>سؤال واحد على Opus: 100 token رايحين و400 راجعين. تمنه كام؟</summary>100×4/1M + 400×20/1M = 0.0004 + 0.008 = <span class="en">$0.0084</span>، يعني أقل من سنت.</details>
+  <details><summary>ليه الـ greedy في Task 1 طلّع جملة غلط مع إنه ثابت؟</summary>لأنه بيبص على آخر كلمة بس. بعد "takes" شاف "7" و"3" بنفس العدد، فاختار أول واحد قابله. مفيش أي حاجة عنده بتفرّق بين الـ refund والـ delivery. الثبات والصح حاجتين مختلفين.</details>
+
+  <div class="glossary" id="m1-glossary">
+    <b>قاموس M1</b> <span class="from">بترتيب ما اتعلّمنا</span>
+    <dl>
+      <dt>LLM</dt><dd>Large Language Model. كيبورد عملاق بيخمّن الحتة الجاية في الكلام، ويكرّر.</dd>
+      <dt>token</dt><dd>حتة من الكلام. ممكن تبقى كلمة أو جزء من كلمة أو علامة.</dd>
+      <dt>model</dt><dd>"المخ" اللي بتختاره في كل request، زي <span class="en">claude-opus-5-5</span>.</dd>
+      <dt>input tokens</dt><dd>الـ tokens اللي إنت بتبعتها. أرخص.</dd>
+      <dt>output tokens</dt><dd>الـ tokens اللي الموديل بيكتبها. أغلى (5× في Opus).</dd>
+      <dt>hallucination</dt><dd>إجابة غلط بتطلع بثقة، لأن الموديل بيكمّل الكلام مش بيتأكد منه.</dd>
+      <dt>API key</dt><dd>زي باسورد لحسابك عند Anthropic. بيتحط في <code>.env</code> بس.</dd>
+    </dl>
+  </div>
+
+  <h2>أسئلة المراجعة</h2>
+  <details><summary>ليه تجربة الـ prompt مرة واحدة مش كفاية؟</summary>لأن الـ LLM مش ثابت. نفس السؤال ممكن ياخد إجابات مختلفة، فلازم تجرّب على حالات كتير وتعدّ.</details>
+  <details><summary>أنهي أغلى: الـ input ولا الـ output؟ وده يأثّر على تصميمك إزاي؟</summary>الـ output (5× في Opus). فخلّي الردود قصيرة ومحددة، وحط التفاصيل في الـ input لو لازم.</details>
+  <details><summary>الـ backend بيكلّم الـ LLM إزاي؟</summary>HTTP request للـ API بتاع الشركة، فيه اسم الـ model والـ messages. وبيرجع الرد ومعاه الـ usage (عدد الـ tokens).</details>
+
+  <div class="more"><details><summary>لو حابب تعرف أكتر: الـ LLM اتعلّم إزاي؟ وتفاصيل قضية Air Canada</summary>
+    <p>الـ LLM بيتعلّم على مرحلتين. الأولى إنه يقرا كمية نصوص ضخمة من الإنترنت والكتب ويتمرّن على تخمين الكلمة الجاية (pre-training). والتانية إن الناس يعلّموه يرد كمساعد مفيد ومهذّب (post-training). Chip Huyen شارحة الاتنين في الفصل 2.</p>
+    <p>القضية: <i class="en">Moffatt v. Air Canada</i>، 2024 BCCRT 149، قرار يوم 14 فبراير 2024 في British Columbia. الشركة حاولت تقول إن الـ chatbot "جهة مستقلة مسؤولة عن كلامها"، والمحكمة رفضت ده، وحكمت للراجل بحوالي 812 دولار كندي.
+    المصدر: <a href="https://www.canlii.org/en/bc/bccrt/doc/2024/2024bccrt149/2024bccrt149.html">نص القرار على CanLII</a>.</p>
+  </details></div>
+
+  <div class="closed">
+    <span class="eyebrow">قفلة الـ module · 2026-10-21</span>
+    <p class="teaser" style="margin:0">ليه الـ chatbot يقول معلومة غلط وهو واثق كده؟ ومين كان المفروض يمنع ده؟</p>
+    <p style="margin:0">لأن الـ LLM مش بيدوّر على الحقيقة. هو بيكمّل الكلام بالشكل اللي شافه كتير، بالظبط زي اللعبة في Task 1 اللي قالت "the refund takes 7 days" وهي ثابتة وواثقة وغلط. والثقة دي مجرد شكل الكلام، مش دليل إنه صح. واللي كان المفروض يمنع ده هو <b>الـ backend</b>: يدّي الموديل السياسة الحقيقية قبل ما يجاوب (M7)، ويقيس الإجابات على حالات كتير قبل ما ينزّل (M8)، ويتأكد من الرد قبل ما يوصل للزبون.</p>
+    <div class="finish">
+      <div class="stat good"><span class="big">$0.009</span><div class="lbl">التكلفة الحقيقية لأول call بتاعك لو على Opus (34 in + 447 out). التقدير كان $0.004، والفرق كله تفكير الموديل</div></div>
+      <div class="stat good"><span class="big">5/5</span><div class="lbl">إجابات مختلفة من 5 (التقدير 5/5) لو قارنت النص. بس معناهم واحد، وده درس M6 وM9</div></div>
+      <div class="stat good"><span class="big">8→0</span><div class="lbl">ردود فاضية من 10 في Task 4، قبل وبعد تصليحك</div></div>
+    </div>
+    <p class="muted" style="margin:0">ملحوظة للمستوى: الـ module ده اتعمل كله على Ollama ببلاش (<span class="en">gemma4:e2b-it-qat</span>)، والأسعار محسوبة كأنها على Claude. أضعف نقطة: التوقّع قبل التشغيل (في Task 1 توقّع 3 وTask 3 اتشغّلوا قبل التوقّع). هنبدأ M2 بتوقّعات مكتوبة.</p>
+  </div>
+</section>
+
+<!-- ============ M2 ============ -->
+<section id="m2" role="tabpanel" hidden>
+  <span class="eyebrow">المستوى 1 · Module 2</span>
+  <h2 style="margin-top:6px">الـ prompt والمحادثة: الموديل مبيفتكرش</h2>
+
+  <div class="opener">
+    <div>
+      <span class="eyebrow">الحكاية (حقيقية، فبراير 2023)</span>
+      <p>مايكروسوفت نزّلت chatbot جوّه Bing. الناس فرحت بيه وقعدت تكلّمه بالساعات.</p>
+      <p>بس في المحادثات الطويلة جدًا، الـ bot بدأ يتوه ويقول كلام غريب ومش في مكانه.</p>
+      <p>مايكروسوفت أخدت قرار سريع: <b>5 أسئلة بس في المحادثة الواحدة</b>، وبعدها لازم تمسح وتبدأ من الأول.</p>
+    </div>
+    <div class="teaser">ليه المحادثة الطويلة بتتوّه الموديل؟ وليه كل رسالة جديدة في نفس المحادثة بتبقى أغلى من اللي قبلها؟</div>
+    <div>
+      <span class="eyebrow">خط النهاية (تقدير)</span>
+      <div class="finish">
+        <div class="stat bad"><span class="big">~50→1500</span><div class="lbl">input tokens من أول رسالة لعاشر رسالة في محادثة عادية (تقدير)</div></div>
+        <div class="stat good"><span class="big">ثابت</span><div class="lbl">بعد الـ module: chat بيفتكر آخر 10 رسايل بس، والتكلفة بتقف عن الزيادة</div></div>
+      </div>
+    </div>
+    <div>
+      <span class="eyebrow">هتقدر...</span>
+      <ul class="cando">
+        <li>تجاوب في interview: "هو الـ LLM API بيفتكر المحادثة؟ أومال ChatGPT بيفتكر إزاي؟"</li>
+        <li>تبني "ذاكرة" لـ support bot في الـ backend بتاعك، وتعرف بتكلّفك كام</li>
+        <li>تعمل جزء الـ chat من اختبار المستوى 1</li>
+      </ul>
+    </div>
+    <div>
+      <span class="eyebrow">إنت فين</span>
+      <div class="map">
+        <span class="lv">Beginner</span><span>M1 ✓</span><span class="here">M2</span><span>M3</span><span>M4</span>
+        <span class="lv">Intermediate</span><span>M5</span><span>M6</span><span>M7</span><span>M8</span><span>M9</span>
+        <span class="lv">Advanced</span><span>M10</span><span>M11</span><span>M12</span><span>M13</span><span>M14</span>
+        <span class="lv">Pro</span><span>M15</span><span>M16</span><span>M17</span><span>M18</span><span>M19</span>
+      </div>
+    </div>
+    <p class="muted" style="margin:0">الحجم: 5 أفكار صغيرة + 4 tasks في الـ lab · حوالي ساعتين على كذا قعدة.</p>
+  </div>
+
+  <p class="muted">كل الكلمات الجديدة متجمّعة في <a href="#m2-glossary">قاموس في آخر الصفحة</a>.</p>
+
+  <!-- Step 1 -->
+  <div class="step">
+    <span class="step-n">الفكرة 1</span>
+    <h3>كارت التعليمات قبل ما الزباين تيجي</h3>
+    <p>تخيّل موظف خدمة عملاء جديد. قبل ما يقعد على المكتب، المدير بيدّيله كارت: "إنت بتشتغل في محل هدوم. اتكلّم بأدب. جاوب في سطر واحد. متوعدش حد بخصم".</p>
+    <p>الزبون عمره ما بيشوف الكارت ده. بس الموظف بيمشي عليه في كل رد.</p>
+    <p class="keyline">الكارت ده اسمه <span class="en">system prompt</span>. ده التعليمات الثابتة اللي الـ backend بتاعك بيبعتها للموديل، بعيد عن كلام الزبون.</p>
+    <figure>
+      <svg viewBox="0 0 620 150" role="img" aria-label="الـ system prompt كارت تعليمات ثابت فوق، وكلام الزبون تحته، والاتنين رايحين للموديل">
+        <defs><marker id="ar21" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="var(--muted)"/></marker></defs>
+        <rect x="10" y="10" width="300" height="56" rx="8" class="fig-acc"/>
+        <text x="160" y="32" text-anchor="middle" class="m">system</text>
+        <text x="160" y="54" text-anchor="middle">"إنت موظف support، جاوب في سطر"</text>
+        <rect x="10" y="84" width="300" height="56" rx="8" class="fig-box"/>
+        <text x="160" y="106" text-anchor="middle" class="m">user</text>
+        <text x="160" y="128" text-anchor="middle">"الـ refund بياخد قد إيه؟"</text>
+        <rect x="460" y="45" width="150" height="60" rx="10" class="fig-box"/><text x="535" y="80" text-anchor="middle" class="m">LLM</text>
+        <path d="M314 38 L420 70 L456 72" class="fig-line" marker-end="url(#ar21)"/>
+        <path d="M314 112 L420 80 L456 78" class="fig-line" marker-end="url(#ar21)"/>
+        <text x="385" y="30" text-anchor="middle" class="mut">ثابت كل مرة</text>
+        <text x="385" y="135" text-anchor="middle" class="mut">بيتغيّر كل مرة</text>
+      </svg>
+      <figcaption>الـ system prompt ثابت ومن عندك. كلام الزبون بيتغيّر مع كل سؤال.</figcaption>
+    </figure>
+<pre>await client.messages.create({
+  model,
+  max_tokens: 1000,
+  system: "You are a support agent for an online shop. Answer in one short sentence.",
+  messages: [{ role: "user", content: "How long does a refund take?" }],
+});</pre>
+    <p>الجديد هنا سطر واحد بس: <code>system</code>.</p>
+    <div class="check"><b>اتأكد إنك فهمت:</b> عايز الـ bot يرد بالعربي دايمًا مهما الزبون كتب بأي لغة. تحط الكلام ده فين؟
+      <details><summary>الإجابة</summary>في الـ <code>system</code> prompt، عشان دي قاعدة ثابتة لكل المحادثات، مش حاجة الزبون بيقولها.</details></div>
+  </div>
+
+  <!-- Step 2 -->
+  <div class="step">
+    <span class="step-n">الفكرة 2</span>
+    <h3>شات الواتساب: كل رسالة ليها صاحب</h3>
+    <p>افتح أي شات واتساب. فيه رسايل على الشمال من الطرف التاني، ورسايل على اليمين منك. لو شلت الألوان والأماكن، مش هتعرف مين قال إيه.</p>
+    <p>الـ API محتاج نفس الحكاية. كل رسالة في <code>messages</code> لازم يتقال مين صاحبها: الزبون، ولا الموديل.</p>
+    <p class="keyline">صاحب الرسالة اسمه <span class="en">role</span>. رسايل الزبون <code>"user"</code>، وردود الموديل <code>"assistant"</code>.</p>
+    <figure>
+      <svg viewBox="0 0 620 170" role="img" aria-label="محادثة فيها رسايل user ورسايل assistant بالتبادل">
+        <rect x="20" y="10" width="300" height="36" rx="10" class="fig-box"/><text x="170" y="33" text-anchor="middle">"رقم طلبي 4417"</text>
+        <text x="345" y="33" class="m mut">user</text>
+        <rect x="300" y="62" width="300" height="36" rx="10" class="fig-acc"/><text x="450" y="85" text-anchor="middle">"تمام، هتابعه معاك"</text>
+        <text x="220" y="85" class="m mut">assistant</text>
+        <rect x="20" y="114" width="300" height="36" rx="10" class="fig-box"/><text x="170" y="137" text-anchor="middle">"وصل لفين؟"</text>
+        <text x="345" y="137" class="m mut">user</text>
+      </svg>
+      <figcaption>زي الواتساب بالظبط: كل رسالة عليها اسم صاحبها، وبالترتيب.</figcaption>
+    </figure>
+<pre>messages: [
+  { role: "user", content: "My order number is 4417." },
+  { role: "assistant", content: "Got it." },
+  { role: "user", content: "Where is it now?" },
+]</pre>
+    <div class="check"><b>اتأكد إنك فهمت:</b> آخر رسالة في <code>messages</code> قبل ما تبعت الـ request، غالبًا بتبقى <code>role</code> إيه؟
+      <details><summary>الإجابة</summary><code>"user"</code>. إنت بتبعت عشان الزبون سأل حاجة جديدة، والموديل هو اللي هيرد عليها.</details></div>
+  </div>
+
+  <!-- Step 3 -->
+  <div class="step">
+    <span class="step-n">الفكرة 3</span>
+    <h3>كاشير بيقابلك كأنها أول مرة، كل مرة</h3>
+    <p>تخيّل كاشير ذاكرته بتتمسح كل ما تمشي من قدّامه. قلتله اسمك، ومشيت خطوة، ورجعت سألته "أنا مين؟". هيقولك "معرفش".</p>
+    <p>الحل الوحيد: كل مرة تروحله، تدّيله ورقة مكتوب فيها كل اللي اتقال قبل كده.</p>
+    <p class="keyline">الـ API ده بالظبط كده. مبيفتكرش أي حاجة بين request والتاني. وده اسمه <span class="en">stateless</span>.</p>
+    <figure>
+      <svg viewBox="0 0 620 190" role="img" aria-label="call 2 من غير التاريخ مبيعرفش الرقم. call 3 بالمحادثة كلها بيعرفه">
+        <text x="20" y="22" class="m">call 2</text>
+        <rect x="90" y="8" width="200" height="30" rx="6" class="fig-box"/><text x="190" y="28" text-anchor="middle">"رقم طلبي إيه؟"</text>
+        <rect x="420" y="8" width="190" height="30" rx="6" class="fig-bad"/><text x="515" y="28" text-anchor="middle">"معرفش، ابعته"</text>
+        <path d="M294 23 H414" class="fig-line"/>
+        <text x="20" y="92" class="m">call 3</text>
+        <rect x="90" y="58" width="200" height="26" rx="6" class="fig-box"/><text x="190" y="76" text-anchor="middle">"رقم طلبي 4417"</text>
+        <rect x="90" y="88" width="200" height="26" rx="6" class="fig-acc"/><text x="190" y="106" text-anchor="middle">"تمام"</text>
+        <rect x="90" y="118" width="200" height="26" rx="6" class="fig-box"/><text x="190" y="136" text-anchor="middle">"رقم طلبي إيه؟"</text>
+        <rect x="420" y="86" width="190" height="30" rx="6" class="fig-ok"/><text x="515" y="106" text-anchor="middle">"4417"</text>
+        <path d="M294 101 H414" class="fig-line"/>
+        <text x="190" y="170" text-anchor="middle" class="mut">الورقة كلها رايحة مع السؤال</text>
+      </svg>
+      <figcaption>الفرق الوحيد بين الـ call ده والتاني: إنت بعت المحادثة كلها، ولا السؤال لوحده.</figcaption>
+    </figure>
+    <div class="lv-box"><span class="lv-tag">من Laravel</span>HTTP نفسه stateless، وLaravel بيعمل الـ session ويشيلها لك في الـ cookies أو Redis. هنا مفيش حد بيعمل كده لوحده. إنت اللي بتخزّن المحادثة (في الـ database أو Redis)، وإنت اللي بتبعتها كلها مع كل سؤال.</div>
+    <div class="check"><b>اتأكد إنك فهمت:</b> ChatGPT بيفتكر كلامك من 10 رسايل فاتوا. مين اللي فاكر فعلًا، الموديل ولا حاجة تانية؟
+      <details><summary>الإجابة</summary>الـ backend بتاع ChatGPT. هو بيخزّن المحادثة، وبيبعتها كلها للموديل مع كل رسالة جديدة. الموديل نفسه مبيفتكرش حاجة.</details></div>
+  </div>
+
+  <!-- Step 4 -->
+  <div class="step">
+    <span class="step-n">الفكرة 4</span>
+    <h3>الورقة بتطوّل، والعدّاد بيزيد</h3>
+    <p>افتكر عدّاد التاكسي من M1: بتدفع على كل كلمة بتقولها. ودلوقتي إنت بتعيد المحادثة كلها مع كل سؤال.</p>
+    <p>يعني أول رسالة بتبعت سطر. والعاشرة بتبعت 10 أسئلة و9 ردود. والـ <code>system</code> prompt كمان بيتبعت مع كل واحدة.</p>
+    <p class="keyline">كل رسالة جديدة أغلى من اللي قبلها، حتى لو السؤال نفسه قصير.</p>
+    <figure>
+      <svg viewBox="0 0 620 190" role="img" aria-label="الـ input tokens بتكبر مع كل رسالة: 100 ثم 200 ثم 300 لحد 1000">
+        <line x1="40" y1="160" x2="600" y2="160" class="fig-line"/>
+        <rect x="55"  y="145" width="40" height="15" class="fig-acc"/>
+        <rect x="110" y="130" width="40" height="30" class="fig-acc"/>
+        <rect x="165" y="115" width="40" height="45" class="fig-acc"/>
+        <rect x="220" y="100" width="40" height="60" class="fig-acc"/>
+        <rect x="275" y="85"  width="40" height="75" class="fig-acc"/>
+        <rect x="330" y="70"  width="40" height="90" class="fig-acc"/>
+        <rect x="385" y="55"  width="40" height="105" class="fig-acc"/>
+        <rect x="440" y="40"  width="40" height="120" class="fig-acc"/>
+        <rect x="495" y="25"  width="40" height="135" class="fig-acc"/>
+        <rect x="550" y="10"  width="40" height="150" class="fig-bad"/>
+        <text x="75" y="178" text-anchor="middle" class="m">1</text>
+        <text x="570" y="178" text-anchor="middle" class="m">10</text>
+        <text x="320" y="178" text-anchor="middle" class="mut">رقم الرسالة في المحادثة</text>
+        <text x="75" y="138" text-anchor="middle" class="m mut">100</text>
+        <text x="510" y="20" text-anchor="end" class="m mut">1000</text>
+      </svg>
+      <figcaption>مثال: كل سؤال وردّه حوالي 100 token. الرسالة العاشرة بتبعت حوالي 1000.</figcaption>
+    </figure>
+    <p>ولو جمعت الـ 10: <span class="en num">100 + 200 + ... + 1000 = 5,500</span> input token. ولو كل رسالة كانت لوحدها كان المجموع 1,000 بس. يعني دفعت <b>5.5 مرات</b> أكتر علشان الموديل "يفتكر".</p>
+    <div class="check"><b>اتأكد إنك فهمت:</b> نفس المثال، بس المحادثة 20 رسالة. مجموع الـ input tokens كام تقريبًا؟
+      <details><summary>الإجابة</summary><span class="en">100 × (1 + 2 + ... + 20) = 100 × 210 = 21,000</span>. المحادثة طولها اتضاعف، بس التكلفة زادت حوالي 4 مرات. عشان كده المحادثات الطويلة غالية.</details></div>
+  </div>
+
+  <!-- Step 5 -->
+  <div class="step">
+    <span class="step-n">الفكرة 5</span>
+    <h3>السبورة ليها مساحة</h3>
+    <p>تخيّل إن الورقة اللي بتدّيها للموديل مكتوبة على سبورة. السبورة ليها مساحة محدودة. لما تتملي، لازم تمسح حاجة.</p>
+    <p>وحتى قبل ما تتملي، السبورة الزحمة صعب تتقري. الموديل ممكن يتوه في النص، وده اللي حصل لـ Bing.</p>
+    <p class="keyline">المساحة دي اسمها <span class="en">context window</span>: أقصى عدد tokens الموديل يقدر يشوفهم في request واحد (الـ system والمحادثة والرد كمان).</p>
+    <div class="tablewrap"><table>
+      <tr><th>الـ model</th><th>الـ context window</th></tr>
+      <tr><td class="en">claude-opus-5-5</td><td class="num">1,000,000 token</td></tr>
+      <tr><td class="en">gemma4:e2b-it-qat</td><td class="num">128,000 token</td></tr>
+    </table></div>
+    <figure>
+      <svg viewBox="0 0 620 150" role="img" aria-label="نحتفظ بآخر رسايل بس ونمسح الأقدم">
+        <rect x="10"  y="40" width="80" height="40" rx="6" class="fig-bad" stroke-dasharray="4 3"/><text x="50" y="65" text-anchor="middle" class="m">msg 1</text>
+        <rect x="100" y="40" width="80" height="40" rx="6" class="fig-bad" stroke-dasharray="4 3"/><text x="140" y="65" text-anchor="middle" class="m">msg 2</text>
+        <rect x="200" y="20" width="410" height="80" rx="10" class="fig-ok"/>
+        <rect x="215" y="40" width="80" height="40" rx="6" class="fig-box"/><text x="255" y="65" text-anchor="middle" class="m">msg 3</text>
+        <rect x="315" y="40" width="80" height="40" rx="6" class="fig-box"/><text x="355" y="65" text-anchor="middle" class="m">msg 4</text>
+        <rect x="415" y="40" width="80" height="40" rx="6" class="fig-box"/><text x="455" y="65" text-anchor="middle" class="m">msg 5</text>
+        <rect x="515" y="40" width="80" height="40" rx="6" class="fig-box"/><text x="555" y="65" text-anchor="middle" class="m">msg 6</text>
+        <text x="95" y="120" text-anchor="middle" class="mut">اتمسحوا</text>
+        <text x="405" y="120" text-anchor="middle" class="mut">اللي بيتبعت للموديل</text>
+      </svg>
+      <figcaption>أبسط حل: تبعت آخر كام رسالة بس، والأقدم تتمسح. بس لاحظ: لو رقم الطلب كان في msg 1، راح.</figcaption>
+    </figure>
+    <div class="check"><b>اتأكد إنك فهمت:</b> بتبعت آخر 10 رسايل بس. الزبون قال رقم طلبه في أول رسالة، وبعد 15 رسالة سأل "رقم طلبي إيه؟". هيحصل إيه؟ وتحلّها إزاي؟
+      <details><summary>الإجابة</summary>الموديل مش هيعرف، لأن الرسالة دي اتمسحت. والحل إن الـ backend يطلّع المعلومات المهمة (زي رقم الطلب) ويحطها في الـ <code>system</code> prompt، أو يخزّنها في الـ database ويبعتها مع كل request. هنعمل كده في Task 3.</details></div>
+  </div>
+
+  <h2>غلطات مشهورة</h2>
+  <ul>
+    <li>تفتكر إن الموديل "فاكر" المحادثة، فتبعت السؤال الأخير بس.</li>
+    <li>تخزّن المحادثة في متغيّر واحد في الـ server لكل الزباين، فزبون يشوف كلام زبون تاني.</li>
+    <li>تسيب المحادثة تكبر من غير حد، فالفاتورة تكبر معاها والموديل يتوه.</li>
+    <li>تصدّق الموديل لما يقول "تمام، سجّلت رقم طلبك". هو مبيسجّلش أي حاجة (هتشوف ده في Task 1).</li>
+  </ul>
+
+  <h2>الـ Tasks في الـ lab</h2>
+  <div class="tasks">
+    <div class="task"><span class="rung">Task 1 · مثال محلول</span><div>
+      <b>الموديل فاكر ولا لأ؟</b> ملف <code>src/m2/task-1/forgetful.ts</code> بيعمل 3 calls: الأول بيقول رقم الطلب 4417. التاني بيسأل "رقم طلبي إيه؟" من غير المحادثة. والتالت بيسأل نفس السؤال ومعاه المحادثة كلها.
+      اقرا الملف، واكتب توقّعك <b>قبل</b> ما تشغّل <code>npm run m2:t1</code>:
+      <ol>
+        <li>Call 2 هيعرف الرقم؟</li>
+        <li>Call 3 هيعرف الرقم؟</li>
+        <li>أنهي call فيهم هيبقى أكبر في الـ input tokens؟ وليه؟</li>
+      </ol>
+      <details><summary>النتيجة الحقيقية (افتحها بعد ما تتوقّع وتشغّل)</summary>
+<pre>Call 1 — tell it the number
+  sent 1 message(s), input tokens: 48
+  -> I have noted your order number for you.
+Call 2 — ask again, sending ONLY the question
+  sent 1 message(s), input tokens: 38
+  -> Please provide your order ID or log into your account to view your order number.
+Call 3 — ask again, sending the WHOLE conversation
+  sent 3 message(s), input tokens: 73
+  -> Your order number is 4417.</pre>
+        Call 2 معرفش، وCall 3 عرف، وCall 3 أغلى في الـ input (73 مقابل 38) عشان شايل المحادثة.
+        <b>وبص على رد Call 1:</b> "I have noted your order number". ده مش حقيقي. الموديل مبيسجّلش أي حاجة في أي حتة. هو بس كمّل الكلام بالرد اللي موظف حقيقي كان هيقوله. ده hallucination صغيرة من M1.
+      </details>
+    </div><span class="pill done">خلص</span></div>
+    <div class="task"><span class="rung">Task 2 · كمّل الناقص</span><div><b>chat في الـ terminal بيفتكر:</b> في <code>src/m2/task-2/chat.ts</code> فيه array اسمه <code>history</code>، وده ذاكرة المحادثة كلها. كمّل الـ 3 <code>TODO(task-2)</code>: تضيف رسالة الزبون، وتبعت الـ history كله، وتضيف رد الموديل وتطبع الأرقام. وبعدين <code>npm run m2:t2:script</code> بيبعت 10 رسايل جاهزة.
+      <p><b>قبل ما تشغّل، توقّع:</b> الدور العاشر هيبعت كام token، مقارنة بالدور الأول؟</p>
+      <p class="muted" style="font-size:14px">ملحوظة: عدّ <code>input_tokens + cache_read_input_tokens</code>. Ollama بيعدّي الجزء اللي قراه قبل كده من المحادثة، وبيحسبه في خانة لوحده. بس الموديل لسه شايفه كله. (الفكرة دي اسمها prompt caching، وهنتكلم عنها في M10.)</p></div><span class="pill done">خلص</span></div>
+    <div class="task"><span class="rung">Task 3 · من الصفر، 20 دقيقة</span><div><b>آخر N رسايل + المعلومات المهمة:</b> في <code>src/m2/task-3/memory.ts</code> اكتب <code>keepLast</code> (تقصّ المحادثة لآخر N رسايل، والنتيجة لازم تبدأ برسالة <code>user</code>) و<code>buildSystem</code> (تحط المعلومات المهمة زي رقم الطلب تحت الـ system prompt). فيه 8 tests (<code>npm run m2:t3:test</code>). وبعدين التجربة: 15 رسالة، وبنبعت آخر 6 بس، مرة والـ facts شغّالة (<code>npm run m2:t3</code>) ومرة من غيرها (<code>npm run m2:t3:no-facts</code>).
+      <p><b>قبل التجربة، توقّع للمرتين:</b> الدور 15 هيعرف رقم الطلب؟ وهيبعت كام token مقارنة بالدور 10 في Task 2 (460)؟</p></div><span class="pill done">خلص</span></div>
+    <div class="task"><span class="rung">Task 4 · Bug hunt</span><div>chat endpoint لكذا زبون في نفس الوقت (<code>src/m2/task-4</code>). زبون A قال رقم طلبه 4417، وزبون B قال 5520، وبعدين كل واحد سأل "رقم طلبي إيه؟". فيه حاجة غلط. شغّل <code>npm run m2:t4:server</code> و<code>npm run m2:t4:load</code>، ولاقيها من الأعراض، وصلّحها، وقيس <code>/sessions</code> قبل وبعد.</div><span class="pill now">دلوقتي</span></div>
+  </div>
+
+  <h2>سجل الأدلة</h2>
+  <div class="tablewrap"><table>
+    <tr><th>الـ task</th><th>التاريخ</th><th>النتيجة</th></tr>
+    <tr><td>Task 1 · 3 توقّعات (اتكتبوا قبل التشغيل)</td><td>2026-10-21</td><td>✓ 3/3: Call 2 مش هيعرف، Call 3 هيعرف، وCall 3 أكبر في الـ input عشان شايل المحادثة. الأرقام الحقيقية 38 مقابل 73. وده تحسّن في نقطة الضعف بتاعة M1</td></tr>
+    <tr><td>سؤال الفكرة 1 (القاعدة الثابتة تتحط فين)</td><td>2026-10-21</td><td>✓ "في الـ system عشان ثابتة وبتتبعت مع كل رسالة، ورسالة الزبون متغيّرة"</td></tr>
+    <tr><td>Task 2 · الكود</td><td>2026-10-21</td><td>✓ الـ 3 TODO صح، والـ type-check عدّى، و<code>history.length - 1</code> مظبوطة. ملاحظة: لو مفيش text، الـ fallback <code>"no text"</code> بيتحط في الـ history كأن الموديل قاله، فبيلخبط باقي المحادثة. اتطلب تصليحه</td></tr>
+    <tr><td>Task 2 · القياس (10 رسايل)</td><td>2026-10-21</td><td>الـ tokens اللي اتبعتت: 46 في الدور 1، و460 في الدور 10، يعني 10× بالظبط. والدور 10 عرف 4417. والتوقّع متكتبش قبل التشغيل. وبرضه الموديل قال "I can access your order details right now"، وده مش حقيقي</td></tr>
+    <tr><td>Task 2 · تصليح الـ fallback</td><td>2026-10-21</td><td>✓ بقى بيضيف رد الموديل للـ history بس لو فيه نص فعلًا. <b>Task 2 خلص</b></td></tr>
+    <tr><td>سؤال الفكرة 5 (آخر 10 رسايل ورقم الطلب في الأولى)</td><td>2026-10-21</td><td>✓ "مش هيعرفه، والحل نبعت رقم الطلب في الـ system"</td></tr>
+    <tr><td>Task 3 · الكود</td><td>2026-10-22</td><td>✓ 8/8 tests والـ type-check عدّى. ملاحظة: الـ shortcut <code>if (n >= history.length) return history.slice()</code> بيعدّي قاعدة "لازم تبدأ بـ user"، و<code>slice(-n)</code> لوحدها كانت كفاية. التوقّعات متكتبتش، وطلب إن كل الأسئلة تبقى اختيار من متعدد من هنا ورايح</td></tr>
+    <tr><td>Task 3 · التجربة (15 رسالة، آخر 6)</td><td>2026-10-22</td><td>facts شغّالة: الدور 15 عرف 4417، وبعت 132 token. من غير facts: معرفش، وبعت 114. مقارنة بـ 460 في الدور 10 من غير قص. والدور 15 بعت 5 رسايل مش 6، عشان القصّة بدأت برد assistant واتشال</td></tr>
+    <tr><td>أول سؤال اختيار من متعدد (ليه 5 رسايل مش 6؟)</td><td>2026-10-22</td><td>✓ اختار ب: آخر 6 بدأت برد assistant و<code>keepLast</code> شالته</td></tr>
+  </table></div>
+
+  <h2>اختبر نفسك</h2>
+  <details><summary>إيه الفرق بين الـ system prompt ورسالة الـ user؟</summary>الـ system تعليمات ثابتة من الـ backend بتاعك لكل المحادثة. والـ user كلام الزبون اللي بيتغيّر كل مرة.</details>
+  <details><summary>محادثة فيها 5 أسئلة، وكل سؤال ورده 200 token. مجموع الـ input tokens كام؟</summary><span class="en">200 × (1+2+3+4+5) = 3,000</span> تقريبًا (من غير الـ system prompt).</details>
+  <details><summary>ليه Bing قفل المحادثة على 5 أسئلة؟</summary>لأن المحادثة الطويلة بتملى الـ context بكلام كتير، والموديل بيتوه فيه. وكمان كل رسالة بتبقى أغلى. فبدل ما يسيبها تكبر، قفلها وطلب تبدأ من جديد.</details>
+
+  <div class="glossary" id="m2-glossary">
+    <b>قاموس M2</b> <span class="from">بترتيب ما اتعلّمنا</span>
+    <dl>
+      <dt>system prompt</dt><dd>كارت التعليمات الثابت اللي الـ backend بيبعته للموديل، والزبون مبيشوفوش.</dd>
+      <dt>role</dt><dd>صاحب الرسالة: <code>"user"</code> للزبون، و<code>"assistant"</code> للموديل.</dd>
+      <dt>stateless</dt><dd>مبيفتكرش حاجة بين request والتاني. إنت اللي لازم تبعت المحادثة كل مرة.</dd>
+      <dt>context window</dt><dd>أقصى عدد tokens الموديل يقدر يشوفهم في request واحد.</dd>
+    </dl>
+  </div>
+
+  <h2>أسئلة المراجعة</h2>
+  <details><summary>الـ LLM API بيفتكر المحادثة؟</summary>لأ، هو stateless. الـ backend هو اللي بيخزّن المحادثة ويبعتها كلها مع كل request.</details>
+  <details><summary>ليه المحادثة الطويلة غالية؟</summary>لأن كل رسالة جديدة بتبعت كل اللي قبلها كـ input tokens، فالتكلفة بتكبر أسرع من طول المحادثة.</details>
+  <details><summary>لو قصّيت المحادثة لآخر N رسايل، إيه اللي ممكن يضيع؟ وتحميه إزاي؟</summary>معلومات مهمة اتقالت في الأول، زي رقم الطلب. تحميها إنك تحطها في الـ system prompt أو تخزّنها لوحدها وتبعتها كل مرة.</details>
+
+  <div class="more"><details><summary>لو حابب تعرف أكتر: Bing ومشكلة "التوهان في النص"</summary>
+    <p>مايكروسوفت كتبت إن المحادثات الطويلة جدًا (15 سؤال أو أكتر) ممكن "تلخبط" الموديل، فحطّت حد 5 أسئلة للمحادثة و50 في اليوم، وبعدها بكام يوم زوّدته لـ 6 و60. المصدر: <a href="https://blogs.bing.com/search/february-2023/The-new-Bing-Edge-Updates-to-Chat">Bing blog — The new Bing &amp; Edge: Updates to Chat</a>.</p>
+    <p>وفيه بحث مشهور اسمه <i class="en">Lost in the Middle</i> (Liu et al., 2023) لقى إن الموديلات بتستخدم المعلومة كويس لو كانت في أول الكلام أو آخره، وأسوأ لو كانت في النص. <a href="https://arxiv.org/abs/2307.03172">arXiv 2307.03172</a>. الـ models الحالية أحسن بكتير في ده، بس الفكرة لسه مهمة: متحشرش كلام مالوش لازمة.</p>
+  </details></div>
+
+  <div class="close-box"><b>قفلة الـ module</b><br>هتتكتب لما نخلص: إجابة سؤال أول الصفحة، ورقم الـ input tokens الحقيقي في الرسالة العاشرة جنب التقدير، وصح على كل "هتقدر" نثبتها.</div>
+</section>
+
+<footer>Track بطريقة skill-coach · الصفحة دي بتتحدّث مع كل module · آخر تحديث 2026-10-21</footer>
+</div>
+
+<script>
+(() => {
+  const tabs = [...document.querySelectorAll('[role="tab"]')];
+  const show = (id) => {
+    tabs.forEach((t) => {
+      const on = t.getAttribute('aria-controls') === id;
+      t.setAttribute('aria-selected', String(on));
+      document.getElementById(t.getAttribute('aria-controls')).hidden = !on;
+    });
+    try { localStorage.setItem('aieng-tab', id); } catch (e) {}
+  };
+  tabs.forEach((t) => t.addEventListener('click', () => { show(t.getAttribute('aria-controls')); history.replaceState(null, '', '#' + t.getAttribute('aria-controls')); }));
+  ['m1-glossary','m2-glossary'].forEach((g) => document.querySelectorAll('a[href="#' + g + '"]').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); document.getElementById(g).scrollIntoView({ behavior: 'smooth' }); })));
+  let start = location.hash.slice(1);
+  if (start.endsWith('-glossary')) start = start.split('-')[0];
+  if (!tabs.some((t) => t.getAttribute('aria-controls') === start)) { try { start = localStorage.getItem('aieng-tab') || 'plan'; } catch (e) { start = 'plan'; } }
+  if (!tabs.some((t) => t.getAttribute('aria-controls') === start)) start = 'plan';
+  show(start);
+})();
+</script>
