@@ -153,7 +153,7 @@ and `/sessions` makes sense for two separate customers. Write down the `/session
 | Task | Rung | Status | What |
 |---|---|---|---|
 | 1 | Worked example | done | Ask for JSON in the prompt, feed the reply straight to `JSON.parse`, and count what survives. |
-| 2 | Fill the gap | upcoming | Strip the wrapping and validate the reply with a zod schema. |
+| 2 | Fill the gap | current | Strip the wrapping and validate the reply with a zod schema. |
 | 3 | From scratch, timed | upcoming | `classify(ticket)` with retry-on-invalid (max 2 retries), with tests; 50 tickets must all be valid. |
 | 4 | Bug hunt | upcoming | A ticket-classifier endpoint has a problem. Find it from the symptoms. |
 
@@ -168,6 +168,18 @@ npm run m3:t1   # 10 tickets, about 1 minute on Ollama
 
 Before running, pick: (1) How many of the 10 replies will be `OK`? a) 9–10 b) 6–8 c) 3–5 d) 0–2
 (2) The most common reason for `CRASH`? a) prose instead of JSON b) a code fence around valid JSON c) cut off by `max_tokens` d) no crashes at all
+
+### M3 Task 2 — how to run
+
+Implement the three `TODO(task-2)` comments in `src/m3/task-2/parse.ts`: the `Ticket` zod schema, `extractJson`,
+and the schema check at the end of `parseTicket`. The tickets and prompt live in `src/m3/tickets.ts`.
+
+```bash
+npm run m3:t2:test   # 9 tests, 6 failing until you implement the TODOs
+npm run m3:t2        # the same 10 tickets as Task 1, every reply goes through parseTicket
+```
+
+Before running `m3:t2`, pick: how many of the 10 will be `OK` now? a) 0–3 b) 4–6 c) 7–8 d) 9–10
 
 ## How to measure (Module 1)
 

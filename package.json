@@ -23,7 +23,9 @@
     "m2:t3:no-facts": "node --env-file-if-exists=.env src/m2/task-3/experiment.ts --no-facts",
     "m2:t4:server": "node --env-file-if-exists=.env src/m2/task-4/server.ts",
     "m2:t4:load": "node src/m2/task-4/load.ts",
-    "m3:t1": "node --env-file-if-exists=.env src/m3/task-1/naive-json.ts"
+    "m3:t1": "node --env-file-if-exists=.env src/m3/task-1/naive-json.ts",
+    "m3:t2:test": "node --test src/m3/task-2/*.test.ts",
+    "m3:t2": "node --env-file-if-exists=.env src/m3/task-2/run.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "0.135.0",

@@ -1098,8 +1098,9 @@ OK: 2   CRASH (not JSON): 8   WRONG (JSON, bad values): 0   out of 10</pre>
         <b>1 د، 2 ب.</b> 8 من 10 وقعوا، وكلهم نفس السبب: JSON سليم جوّه <code>```json ... ```</code>. والقيم نفسها كانت كلها من المسموح. يعني الموديل كان فاهم المطلوب، والكود هو اللي وقع.
         <b>وبص على #1:</b> "الأوردر وصل مكسور" اتصنّف <code>technical</code>. مش غلط في الـ schema، بس غلط في المعنى (المفروض shipping). الـ schema بيضمن الشكل، مش الصح. والسؤال ده (هو صنّف صح؟) هيبقى موضوع الـ evals في M8.
       </details>
-    </div><span class="pill">دلوقتي</span></div>
-    <div class="task"><span class="rung">Task 2 · كمّل الناقص</span><div><b>شيل الظرف وحط البوّاب:</b> هتكتب <code>extractJson</code> (تشيل الـ code fence) والـ zod schema، وتعيد نفس الـ 10 شكاوى، وتعدّ كام عدّى. (هيتجهّز لما تخلّص Task 1)</div><span class="pill">جاي</span></div>
+    </div><span class="pill done">خلص</span></div>
+    <div class="task"><span class="rung">Task 2 · كمّل الناقص</span><div><b>شيل الظرف وحط البوّاب:</b> في <code>src/m3/task-2/parse.ts</code> فيه 3 <code>TODO(task-2)</code>: الـ <code>Ticket</code> schema بـ zod، و<code>extractJson</code> (تاخد من أول <code>{</code> لآخر <code>}</code>)، و<code>safeParse</code> في آخر <code>parseTicket</code>. فيه 9 tests (<code>npm run m3:t2:test</code>)، منهم 6 واقعين لحد ما تكتب الـ TODOs. وبعدين <code>npm run m3:t2</code> بيعيد نفس الـ 10 شكاوى.
+      <p><b>قبل ما تشغّل، اختار:</b> كام من الـ 10 هياخدوا <code>OK</code> دلوقتي؟ أ) 0–3 · ب) 4–6 · ج) 7–8 · د) 9–10</p></div><span class="pill">دلوقتي</span></div>
     <div class="task"><span class="rung">Task 3 · من الصفر، 20 دقيقة</span><div><b>classifier بالـ retry:</b> function <code>classify(ticket)</code> بتعمل retry with feedback بحد أقصى محاولتين، وليها tests بموديل وهمي. وبعدين 50 شكوى، والنجاح: 50/50 متحقّق منهم، مع عدد الـ retries وتكلفتهم.</div><span class="pill">جاي</span></div>
     <div class="task"><span class="rung">Task 4 · Bug hunt</span><div>endpoint بيصنّف الشكاوى، وفيه حاجة غلط. هتلاقيها من الأعراض.</div><span class="pill">جاي</span></div>
   </div>
