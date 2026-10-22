@@ -1108,6 +1108,10 @@ OK: 2   CRASH (not JSON): 8   WRONG (JSON, bad values): 0   out of 10</pre>
   <div class="tablewrap"><table>
     <tr><th>الـ task</th><th>التاريخ</th><th>النتيجة</th></tr>
     <tr><td>Task 1 · تجربة قبل الـ module (من عندي)</td><td>2026-10-22</td><td>Ollama: <code>OK 2 · CRASH 8 · WRONG 0</code> من 10. و<code>messages.parse</code> + <code>output_config.format</code> اتجاهل على Ollama</td></tr>
+    <tr><td>مراجعة متباعدة (M1 + M2)، 3 أسئلة</td><td>2026-10-22</td><td>✓ 3/3: <code>max_tokens</code> والنص فاضي ← ب · الـ API stateless ← ج · <code>EMPTY</code> مشترك بين A وB ← ب (نقطة ضعف الـ reference اتحسّنت)</td></tr>
+    <tr><td>سؤال الفكرة 1 (محتاج إيه عشان تعمل route للشكوى)</td><td>2026-10-22</td><td>✓ ب: JSON فيه <code>category</code> من قيم معروفة</td></tr>
+    <tr><td>سؤال الفكرة 2 (<code>JSON.parse</code> على "Sure! {...}")</td><td>2026-10-22</td><td>✓ ج: <code>SyntaxError</code></td></tr>
+    <tr><td>Task 1 · التوقّعات والتشغيل</td><td>2026-10-22</td><td>سؤال 2 ✓ ب (code fence). سؤال 1 متوقّعش، وقال "رد الموديل مش متوقع"، وده صح (M1). تشغيله طلع <code>OK</code> في نطاق ج (3–5)، وتشغيلي طلع 2. نفس الكود، ورقم مختلف كل مرة. <b>Task 1 خلص</b></td></tr>
   </table></div>
 
   <div class="glossary" id="m3-glossary">
