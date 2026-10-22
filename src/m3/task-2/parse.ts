@@ -4,7 +4,11 @@ import { CATEGORIES, URGENCIES } from "../tickets.ts";
 
 // TODO(task-2): describe the reply with zod.
 //   category: one of CATEGORIES, urgency: one of URGENCIES, orderId: a string or null.
-export const Ticket = z.object({});
+export const Ticket = z.object({
+  category: z.enum(CATEGORIES),
+  urgency: z.enum(URGENCIES),
+  orderId: z.string().nullable(),
+});
 
 export type Ticket = z.infer<typeof Ticket>;
 
@@ -13,6 +17,14 @@ export type Ticket = z.infer<typeof Ticket>;
 //   Hint: the JSON object starts at the first "{" and ends at the last "}".
 //   If there is no "{" ... "}" at all, return the text unchanged (JSON.parse will then fail with a clear error).
 export function extractJson(text: string): string {
+  if (!text.includes("{") && !text.includes("}")) {
+    return text;
+  }
+
+  if (!text.startsWith("{") || !text.endsWith("}")) {
+    text = text.slice(text.indexOf("{"), text.lastIndexOf("}") + 1);
+  }
+
   return text;
 }
 
@@ -31,5 +43,11 @@ export function parseTicket(text: string): ParseResult {
   // TODO(task-2): check `raw` against the Ticket schema without throwing.
   //   On success return { ok: true, data }. On failure return stage "schema" and a short error
   //   built from the zod issues, e.g. "urgency: Invalid option ...".
-  return { ok: true, data: raw as Ticket };
+  const result = Ticket.safeParse(raw);
+  
+  if (!result.success) {
+    return { ok: false, stage: "schema", error: result.error.issues.map(issue => issue.path.join(',') + ": " + issue.message).join(',') };
+  }
+
+  return { ok: true, data: result.data };
 }

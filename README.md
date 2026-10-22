@@ -153,7 +153,7 @@ and `/sessions` makes sense for two separate customers. Write down the `/session
 | Task | Rung | Status | What |
 |---|---|---|---|
 | 1 | Worked example | done | Ask for JSON in the prompt, feed the reply straight to `JSON.parse`, and count what survives. |
-| 2 | Fill the gap | current | Strip the wrapping and validate the reply with a zod schema. |
+| 2 | Fill the gap | done | Strip the wrapping and validate the reply with a zod schema. |
 | 3 | From scratch, timed | upcoming | `classify(ticket)` with retry-on-invalid (max 2 retries), with tests; 50 tickets must all be valid. |
 | 4 | Bug hunt | upcoming | A ticket-classifier endpoint has a problem. Find it from the symptoms. |
 
