@@ -1101,7 +1101,12 @@ OK: 2   CRASH (not JSON): 8   WRONG (JSON, bad values): 0   out of 10</pre>
     </div><span class="pill done">خلص</span></div>
     <div class="task"><span class="rung">Task 2 · كمّل الناقص</span><div><b>شيل الظرف وحط البوّاب:</b> في <code>src/m3/task-2/parse.ts</code> فيه 3 <code>TODO(task-2)</code>: الـ <code>Ticket</code> schema بـ zod، و<code>extractJson</code> (تاخد من أول <code>{</code> لآخر <code>}</code>)، و<code>safeParse</code> في آخر <code>parseTicket</code>. فيه 9 tests (<code>npm run m3:t2:test</code>)، منهم 6 واقعين لحد ما تكتب الـ TODOs. وبعدين <code>npm run m3:t2</code> بيعيد نفس الـ 10 شكاوى.
       <p><b>قبل ما تشغّل، اختار:</b> كام من الـ 10 هياخدوا <code>OK</code> دلوقتي؟ أ) 0–3 · ب) 4–6 · ج) 7–8 · د) 9–10</p></div><span class="pill done">خلص</span></div>
-    <div class="task"><span class="rung">Task 3 · من الصفر، 20 دقيقة</span><div><b>classifier بالـ retry:</b> function <code>classify(ticket)</code> بتعمل retry with feedback بحد أقصى محاولتين، وليها tests بموديل وهمي. وبعدين 50 شكوى، والنجاح: 50/50 متحقّق منهم، مع عدد الـ retries وتكلفتهم.</div><span class="pill">جاي</span></div>
+    <div class="task"><span class="rung">Task 3 · من الصفر، 20 دقيقة</span><div><b>classifier بالـ retry:</b> في <code>src/m3/task-3/classify.ts</code> اكتب <code>classify(ticket, callModel)</code>: أول request فيه رسالة user واحدة (<code>PROMPT + ticket</code>)، ولو <code>parseTicket</code> رفض الرد، تضيف رد الموديل كـ assistant ورسالة user فيها الـ error، وتبعت تاني. والحد الأقصى 1 + <code>MAX_RETRIES</code> (يعني 3 محاولات)، وترجّع عدد المحاولات ومجموع الـ tokens بتاعتها كلها. فيه 9 tests بموديل وهمي (<code>npm run m3:t3:test</code>)، وبعدين <code>npm run m3:t3</code> على 50 شكوى، و<code>npm run m3:t3:chaos</code> اللي بيبوّظ حوالي 20% من أول رد بالقصد، عشان تشوف الـ retry شغّال مع الموديل الحقيقي.
+      <p><b>قبل ما تشغّل، اختار:</b></p>
+      <ol>
+        <li><code>m3:t3</code>: كام من الـ 50 هيطلعوا صح؟ أ) أقل من 40 · ب) 40–47 · ج) 48–50</li>
+        <li><code>m3:t3:chaos</code>: شكوى احتاجت retry واحد، بتبعت كام input token مقارنة بشكوى عدّت من أول مرة؟ أ) نفس العدد · ب) أكتر شوية (رسالة الـ error بس) · ج) أكتر من الضعف (المحادثة كلها تاني + الرد الغلط + الـ error) · د) أقل</li>
+      </ol></div><span class="pill">دلوقتي</span></div>
     <div class="task"><span class="rung">Task 4 · Bug hunt</span><div>endpoint بيصنّف الشكاوى، وفيه حاجة غلط. هتلاقيها من الأعراض.</div><span class="pill">جاي</span></div>
   </div>
 
@@ -1116,6 +1121,8 @@ OK: 2   CRASH (not JSON): 8   WRONG (JSON, bad values): 0   out of 10</pre>
     <tr><td>Task 2 · المراجعة الأولى</td><td>2026-10-22</td><td>التوقّع د (9–10). 9/9 tests والـ type-check عدّى، والـ schema و<code>safeParse</code> صح. بس <code>extractJson</code> بياخد لحد <b>أول</b> <code>}</code> مش آخر واحد، فـ JSON فيه object جوّه object بيتقطع (اتجرّب: <code>"meta": {"lang": "en"}</code> ← stage json). وكمان بيرمي error بدل ما يرجّع النص زي ما هو. اتطلب تصليحه، ولسه مفيش commit</td></tr>
     <tr><td>Task 2 · سؤالين اختيار من متعدد + التصليح</td><td>2026-10-22</td><td>✓ 1 ب (أول <code>}</code>) · ✓ 2 أ (رجّع النص عشان error الـ <code>JSON.parse</code> يبقى مفيد). صلّح لـ <code>lastIndexOf</code>، بس في الأول رجّع جملة من عنده بدل النص. ✓ سؤال تالت: أ (<code>return text</code>)، وصلّحها</td></tr>
     <tr><td>Task 2 · القياس</td><td>2026-10-22</td><td>✓ التوقّع د (9–10) صح. <code>OK: 10 · FAIL json: 0 · FAIL schema: 0</code> من 10، بعد ما كانت 2 (أو 3–5) في Task 1، ونفس الشكاوى ونفس الموديل. اللي اتغيّر الكود بتاعنا بس. 9/9 tests. <b>Task 2 خلص</b></td></tr>
+    <tr><td>سؤال الفكرة 4 (المحاولة التانية بتبعت إيه)</td><td>2026-10-22</td><td>✓ ب: الشكوى + الرد الغلط + الـ error</td></tr>
+    <tr><td>سؤال الفكرة 5 (محتاج zod مع constrained decoding؟)</td><td>2026-10-22</td><td>✓ ب: أيوه، عشان الرد ممكن يتقطع بسبب <code>max_tokens</code> أو الموديل يرفض يرد</td></tr>
   </table></div>
 
   <div class="glossary" id="m3-glossary">

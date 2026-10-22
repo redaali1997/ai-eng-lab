@@ -154,7 +154,7 @@ and `/sessions` makes sense for two separate customers. Write down the `/session
 |---|---|---|---|
 | 1 | Worked example | done | Ask for JSON in the prompt, feed the reply straight to `JSON.parse`, and count what survives. |
 | 2 | Fill the gap | done | Strip the wrapping and validate the reply with a zod schema. |
-| 3 | From scratch, timed | upcoming | `classify(ticket)` with retry-on-invalid (max 2 retries), with tests; 50 tickets must all be valid. |
+| 3 | From scratch, timed | current | `classify(ticket)` with retry-on-invalid (max 2 retries), with tests; 50 tickets must all be valid. |
 | 4 | Bug hunt | upcoming | A ticket-classifier endpoint has a problem. Find it from the symptoms. |
 
 Note: Ollama 0.40.6 ignores `output_config.format` (Claude's constrained decoding), so `client.messages.parse`
@@ -180,6 +180,22 @@ npm run m3:t2        # the same 10 tickets as Task 1, every reply goes through p
 ```
 
 Before running `m3:t2`, pick: how many of the 10 will be `OK` now? a) 0–3 b) 4–6 c) 7–8 d) 9–10
+
+### M3 Task 3 — how to run (timed: 20 minutes, no peeking at Task 2's runner)
+
+Implement `classify` in `src/m3/task-3/classify.ts`. It reuses your `parseTicket` from Task 2.
+The tests use a fake model, so they are fast and need no LLM.
+
+```bash
+npm run m3:t3:test    # 9 tests, 8 failing until you implement classify
+npm run m3:t3         # 50 tickets, about 6 minutes on Ollama
+npm run m3:t3:chaos   # same, but ~20% of first replies are damaged on purpose to exercise the retry path
+```
+
+Before running, pick:
+(1) `m3:t3` — how many of the 50 will be valid? a) under 40 b) 40–47 c) 48–50
+(2) `m3:t3:chaos` — a ticket that needed one retry, compared with one that passed first time, sends how many input tokens?
+a) the same b) a little more (just the error message) c) more than double (the whole conversation again, plus the bad reply and the error) d) fewer
 
 ## How to measure (Module 1)
 
