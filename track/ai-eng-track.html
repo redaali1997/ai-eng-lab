@@ -146,7 +146,7 @@ footer { margin-top: 60px; font-size: 13.5px; color: var(--muted); border-top: 1
   <button role="tab" aria-controls="plan" aria-selected="true">الخطة</button>
   <button role="tab" aria-controls="m1" aria-selected="false">M1 · يعني إيه LLM ✓</button>
   <button role="tab" aria-controls="m2" aria-selected="false">M2 · الموديل مبيفتكرش ✓</button>
-  <button role="tab" aria-controls="m3" aria-selected="false">M3 · JSON يدخل الكود</button>
+  <button role="tab" aria-controls="m3" aria-selected="false">M3 · JSON يدخل الكود ✓</button>
 </nav>
 
 <!-- ============ PLAN ============ -->
@@ -181,9 +181,9 @@ footer { margin-top: 60px; font-size: 13.5px; color: var(--muted); border-top: 1
         <div class="meta">next-token prediction، token، model، تكلفة input/output، hallucination — Chip Huyen <i class="en">AI Engineering</i> ف1–ف2، Alammar &amp; Grootendorst <i class="en">Hands-On LLMs</i> ف2، anthropics/courses (API fundamentals) · النجاح: أول call لـ Claude من Node، وتحسب تكلفة السؤال بالسنت، وتقيس كام إجابة مختلفة من 5 مرات</div> <span class="pill done">خلص 2026-10-21</span></li>
       <li class="done"><div class="t">M2 · الـ prompt والمحادثة: الموديل مبيفتكرش</div>
         <div class="meta">system prompt، messages وأدوار user/assistant، الـ API stateless (إنت اللي بتبعت المحادثة كلها كل مرة)، context window — Huyen ف5، anthropics/courses (Prompt engineering، Real-world prompting)، Claude docs (Prompt engineering) · النجاح: chat endpoint بيفتكر آخر 10 رسايل، وتقيس التكلفة بتزيد إزاي مع طول المحادثة</div> <span class="pill done">خلص 2026-10-22</span></li>
-      <li class="now"><div class="t">M3 · Structured output: الرد يبقى JSON يدخل الكود</div>
-        <div class="meta">JSON schema، zod، <span class="en">messages.parse</span>، التحقق من الرد — Claude docs (Structured outputs)، Huyen ف5 · النجاح: classifier للـ support tickets بيرجّع JSON صح 50/50 مرة</div></li>
-      <li><div class="t">M4 · Streaming والأخطاء: الـ call في الـ production</div>
+      <li class="done"><div class="t">M3 · Structured output: الرد يبقى JSON يدخل الكود</div>
+        <div class="meta">JSON schema، zod، <span class="en">messages.parse</span>، التحقق من الرد — Claude docs (Structured outputs)، Huyen ف5 · النجاح: classifier للـ support tickets بيرجّع JSON صح 50/50 مرة</div> <span class="pill done">خلص 2026-10-24</span></li>
+      <li class="now"><div class="t">M4 · Streaming والأخطاء: الـ call في الـ production</div>
         <div class="meta">streaming للـ UI، timeouts، retries، rate limits (429)، الـ refusal stop reason، fallbacks — Claude docs (Streaming, Errors, Rate limits) · النجاح: endpoint بيعمل stream، ولما تبعتله 50 request مرة واحدة ميقعش</div></li>
     </ol>
     <div class="passtest"><b>اختبار المستوى:</b> HTTP endpoint في Node بياخد شكوى زبون، يرجّع JSON متحقّق منه (النوع، الأولوية، ملخّص)، ويعمل stream لرد مقترح، ويستحمل 429 من غير ما يقع. وكل request بيطبع تكلفته.</div>
@@ -1109,7 +1109,7 @@ OK: 2   CRASH (not JSON): 8   WRONG (JSON, bad values): 0   out of 10</pre>
       </ol></div><span class="pill done">خلص</span></div>
     <div class="task"><span class="rung">Task 4 · Bug hunt</span><div>فريق الـ support عنده endpoint بيصنّف كل شكوى (<code>src/m3/task-4</code>)، وأي شكوى <code>high</code> بتعمل page للموظف المناوب. الزباين اللي عندهم مصيبة بجد بيقولوا محدش كلّمهم. والـ endpoint عمره ما وقع، وبيقول <code>invalidReplies: 0</code>. شغّل <code>npm run m3:t4:server</code> و<code>npm run m3:t4:load</code>، ولاقي السبب من الأعراض، وصلّحه، وقيس <code>/stats</code> قبل وبعد.
       <p class="muted" style="font-size:14px">النجاح: على server لسه مشتغّل من جديد وrun واحد، الـ 4 شكاوى المستعجلة بتعمل page، و<code>byCategory</code> و<code>byUrgency</code> شكلهم منطقي، وأي رد مش مظبوط يظهر في <code>invalidReplies</code> بدل ما يتحوّل لحاجة تانية من غير ما حد ياخد باله.</p>
-      <details><summary>الحل (بعد ما تخلّص)</summary>في <code>triage.ts</code>: الـ prompt بياخد القيم من <code>labels.ts</code> بتاعة الـ dashboard (<code>"Low", "Medium", "High"</code> بحروف كابيتال)، فالموديل بيرد <code>"High"</code> زي ما اتطلب منه. والـ schema مستني <code>"high"</code>، بس عليه <code>.catch("low")</code>، فأي قيمة مش متطابقة بتتحوّل لـ <code>"low"</code> من غير ما حد يعرف. و<code>.catch("other")</code> عملت نفس الحكاية في الـ category. النتيجة: 10/10 <code>low</code>/<code>other</code>، و0 page، و<code>invalidReplies: 0</code>. والتصليح جزئين: (1) الـ prompt ياخد القيم من الـ schema نفسه (<code>Triage.shape.urgency.options</code>)، عشان يبقى فيه مصدر واحد للقيم. (2) تشيل الـ <code>.catch</code>، عشان أي رد غلط يظهر كـ invalid ويروح للـ manual queue (أو يتعمله retry زي Task 3). بعد التصليح: 5 page (الـ 4 المستعجلين + الأوردر المكسور)، و<code>low 4 · medium 1 · high 5</code>.</details></div><span class="pill">دلوقتي</span></div>
+      <details><summary>الحل (بعد ما تخلّص)</summary>في <code>triage.ts</code>: الـ prompt بياخد القيم من <code>labels.ts</code> بتاعة الـ dashboard (<code>"Low", "Medium", "High"</code> بحروف كابيتال)، فالموديل بيرد <code>"High"</code> زي ما اتطلب منه. والـ schema مستني <code>"high"</code>، بس عليه <code>.catch("low")</code>، فأي قيمة مش متطابقة بتتحوّل لـ <code>"low"</code> من غير ما حد يعرف. و<code>.catch("other")</code> عملت نفس الحكاية في الـ category. النتيجة: 10/10 <code>low</code>/<code>other</code>، و0 page، و<code>invalidReplies: 0</code>. والتصليح جزئين: (1) الـ prompt ياخد القيم من الـ schema نفسه (<code>Triage.shape.urgency.options</code>)، عشان يبقى فيه مصدر واحد للقيم. (2) تشيل الـ <code>.catch</code>، عشان أي رد غلط يظهر كـ invalid ويروح للـ manual queue (أو يتعمله retry زي Task 3). بعد التصليح: 5 page (الـ 4 المستعجلين + الأوردر المكسور)، و<code>low 4 · medium 1 · high 5</code>.</details></div><span class="pill done">خلص</span></div>
   </div>
 
   <h2>سجل الأدلة</h2>
@@ -1129,6 +1129,9 @@ OK: 2   CRASH (not JSON): 8   WRONG (JSON, bad values): 0   out of 10</pre>
     <tr><td>Task 3 · سؤالين اختيار من متعدد + التصليح</td><td>2026-10-23</td><td>✓ 1 ب (بتدفع تمن كل محاولة) · ✓ 2 أ (<code>res.text || "(empty reply)"</code>). صلّح الاتنين، وشال الـ import الزيادة، وبقت الرسالة "Reply with corrected JSON only". 9/9 tests</td></tr>
     <tr><td>Task 3 · القياس (50 شكوى)</td><td>2026-10-23</td><td>✓ التوقّع 1 ج صح: <code>valid 50/50</code>، و0 retries. tokens: in 4850 / out 20012، يعني <b>$0.42</b> لو على Opus. الـ output أكبر من الـ input 4 مرات، عشان الـ thinking (M1)</td></tr>
     <tr><td>Task 3 · chaos (50 شكوى، حوالي 20% من أول رد متبوّظ)</td><td>2026-10-23</td><td>✓ التوقّع 2 ج صح: شكوى عدّت من أول مرة ≈ 97 input token، وشكوى احتاجت retry ≈ 246–271 (حوالي 2.6×)، وشكوى احتاجت 3 محاولات = 474 (حوالي 4.9×). <code>valid 49/50</code>، و6 شكاوى احتاجت retry، و7 calls زيادة، والتكلفة <b>$0.50</b> بدل $0.42 (+19%). #19 فشلت 3 مرات: جرّبتها 5 مرات تاني، وفي مرة منهم الموديل <b>نسخ رده الغلط</b> (<code>"MEDIUM"</code>) في المحاولة التانية، عشان شايفه في المحادثة. يعني الـ retry مش مضمون، و<code>ok: false</code> لازم يتعامل معاه. <b>Task 3 خلص</b></td></tr>
+    <tr><td>Task 4 · المراجعة الأولى</td><td>2026-10-24</td><td>✓ التوقّع ب (كل الشكاوى نفس القيمة). لقى نص السبب: الـ prompt بيطلب "Low, Medium, High" بحروف كابيتال، وصلّحه بـ <code>.toLowerCase()</code>. <code>/stats</code> بعد: paged 5، و<code>low 3 · medium 2 · high 5</code>. بس الـ <code>.catch</code> لسه موجود: اتجرّب <code>"URGENT"</code> و<code>"High"</code> و<code>"critical"</code>، والتلاتة عدّوا <code>success: true</code> كـ <code>low</code>. يعني شرط "الرد الغلط يظهر في <code>invalidReplies</code>" لسه ماتحقّقش. ولسه مفيش commit</td></tr>
+    <tr><td>Task 4 · سؤالين اختيار من متعدد + التصليح</td><td>2026-10-24</td><td>✓ شرح بنفسه: "<code>.catch("low")</code> لو الـ validation معدّاش بياخد low، وHigh ماكانتش بتعدّي". ✓ 1 ب · ✓ 2 ج. شال الـ <code>.catch</code> من الـ 3 خانات</td></tr>
+    <tr><td>Task 4 · بعد التصليح (server جديد + load مرة واحدة)</td><td>2026-10-24</td><td>✓ <code>paged 5</code> (الـ 4 المستعجلين + الأوردر المكسور)، و<code>low 4 · medium 1 · high 5</code>، و<code>billing 1 · other 2 · technical 2 · shipping 5</code>، و<code>invalidReplies 0</code> المرة دي حقيقي. قبل التصليح: 10/10 low/other، و0 page. <b>Task 4 خلص</b></td></tr>
   </table></div>
 
   <div class="glossary" id="m3-glossary">
@@ -1151,6 +1154,23 @@ OK: 2   CRASH (not JSON): 8   WRONG (JSON, bad values): 0   out of 10</pre>
   <div class="check"><b>2.</b> إمتى تستخدم retry with feedback بدل <code>output_config.format</code>؟
     <ol class="mcq"><li>أ) دايمًا، هو أرخص</li><li>ب) لما الـ provider مش بيدعم constrained decoding (زي Ollama عندنا)</li><li>ج) مع Claude بس</li><li>د) مش محتاجه أبدًا</li></ol>
     <details><summary>الإجابة</summary><b>ب.</b> الـ retry بيكلّف tokens زيادة، فلو الـ API بيضمن الشكل من الأول ده أحسن. بس لو مش بيدعمه، الـ retry هو شبكة الأمان.</details></div>
+
+  <div class="closed">
+    <span class="eyebrow">قفلة الـ module · 2026-10-24</span>
+    <p class="teaser" style="margin:0">ليه موديل فاهم الشكوى صح ممكن يوقّع الـ backend بتاعك؟ وإزاي تخلّي ده مستحيل يحصل؟</p>
+    <p style="margin:0">عشان الموديل بيكتب للبني آدمين. بيفهم الشكوى صح، بس يلفّ الـ JSON في ظرف (<code>```json</code>)، أو يكتب <code>"High"</code> بدل <code>"high"</code>. وده كفاية إنه يوقّع <code>JSON.parse</code>، أو يعدّي قيمة غلط للـ database. والحل في إيد الـ backend، على 3 طبقات: تشيل الظرف، وبوّاب zod يرفض أي شكل غلط، وretry with feedback بحد أقصى. وعلى Claude، الـ constrained decoding بيمنع الشكل الغلط من الأول خالص. وTask 4 علّمنا أوحش حاجة: البوّاب اللي "عمره ما بيرفض" (<code>.catch</code>) أخطر من مفيش بوّاب، عشان الغلط بيبقى ساكت.</p>
+    <div class="finish">
+      <div class="stat bad"><span class="big">2/10</span><div class="lbl"><code>JSON.parse</code> على الرد على طول (Task 1؛ وعندك 3–5). التقدير كان حوالي 7/10، والسبب كان code fences في كل مرة</div></div>
+      <div class="stat good"><span class="big">10/10 → 50/50</span><div class="lbl">بعد <code>extractJson</code> + zod (Task 2)، وبعد <code>classify</code> بالـ retry على 50 شكوى (Task 3)، بـ $0.42 على Opus</div></div>
+      <div class="stat good"><span class="big">0 → 5</span><div class="lbl">شكاوى مستعجلة اتعملها page في Task 4، بعد ما شلت الـ <code>.catch</code> وصلّحت قيم الـ prompt</div></div>
+    </div>
+    <ul class="cando">
+      <li class="ok">✓ تاخد رد الموديل وتحطه في الـ database من غير ما حاجة تقع (Task 2 + 3)</li>
+      <li class="ok">✓ تجاوب في interview: "إزاي تضمن إن الـ LLM يرجّع JSON صح؟": constrained decoding لو موجود، وschema validation دايمًا، وretry بحد أقصى، وmanual queue للي يفشل</li>
+      <li class="ok">✓ جزء الـ JSON المتحقّق منه في اختبار المستوى 1</li>
+    </ul>
+    <p class="muted" style="margin:0">ملحوظات للمستوى: كل الـ 13 سؤال اختيار من متعدد في الـ module كانوا صح من أول مرة. والغلطات اللي ظهرت في الكود كانت حالات حدّية مش في الـ tests: أول <code>}</code> بدل آخر واحد، و<code>usage</code> بيتكتب فوقه بدل ما يتجمع، ورد فاضي. وفي الـ runs، الأرقام كنت بشغّلها أنا في الغالب. حاجة صغيرة لسه ممكن تتحسّن: الـ prompt لسه بياخد القيم من <code>labels.ts</code> بـ <code>.toLowerCase()</code>، يعني فيه مصدرين للقيم. الأأمن إنه ياخدها من الـ schema نفسه.</p>
+  </div>
 </section>
 
 <footer>Track بطريقة skill-coach · الصفحة دي بتتحدّث مع كل module · آخر تحديث 2026-10-22</footer>

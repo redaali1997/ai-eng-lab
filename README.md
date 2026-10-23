@@ -155,7 +155,7 @@ and `/sessions` makes sense for two separate customers. Write down the `/session
 | 1 | Worked example | done | Ask for JSON in the prompt, feed the reply straight to `JSON.parse`, and count what survives. |
 | 2 | Fill the gap | done | Strip the wrapping and validate the reply with a zod schema. |
 | 3 | From scratch, timed | done | `classify(ticket)` with retry-on-invalid (max 2 retries), with tests; 50 tickets must all be valid. |
-| 4 | Bug hunt | current | A ticket-classifier endpoint has a problem. Find it from the symptoms. |
+| 4 | Bug hunt | done | A ticket-classifier endpoint has a problem. Find it from the symptoms. |
 
 Note: Ollama 0.40.6 ignores `output_config.format` (Claude's constrained decoding), so `client.messages.parse`
 fails on Ollama. This module validates in our own code instead; on Claude you would use both.

@@ -5,16 +5,16 @@ import { extractJson } from "../task-2/parse.ts";
 import { URGENCY_LABELS, CATEGORY_LABELS } from "./labels.ts";
 
 export const Triage = z.object({
-  category: z.enum(["billing", "shipping", "technical", "other"]).catch("other"),
-  urgency: z.enum(["low", "medium", "high"]).catch("low"),
-  orderId: z.string().nullable().catch(null),
+  category: z.enum(["billing", "shipping", "technical", "other"]),
+  urgency: z.enum(["low", "medium", "high"]),
+  orderId: z.string().nullable(),
 });
 export type Triage = z.infer<typeof Triage>;
 
 const PROMPT = `Classify the support ticket below.
 Reply with JSON only, with exactly these keys:
-- "category": one of ${CATEGORY_LABELS.join(", ")}
-- "urgency": one of ${URGENCY_LABELS.join(", ")}
+- "category": one of ${CATEGORY_LABELS.join(", ").toLowerCase()}
+- "urgency": one of ${URGENCY_LABELS.join(", ").toLowerCase()}
 - "orderId": the order number as a string, or null if there is none
 
 Ticket:
