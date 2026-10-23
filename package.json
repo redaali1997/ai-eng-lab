@@ -28,7 +28,9 @@
     "m3:t2": "node --env-file-if-exists=.env src/m3/task-2/run.ts",
     "m3:t3:test": "node --test src/m3/task-3/*.test.ts",
     "m3:t3": "node --env-file-if-exists=.env src/m3/task-3/run.ts",
-    "m3:t3:chaos": "node --env-file-if-exists=.env src/m3/task-3/run.ts --chaos"
+    "m3:t3:chaos": "node --env-file-if-exists=.env src/m3/task-3/run.ts --chaos",
+    "m3:t4:server": "node --env-file-if-exists=.env src/m3/task-4/server.ts",
+    "m3:t4:load": "node src/m3/task-4/load.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "0.135.0",

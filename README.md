@@ -155,7 +155,7 @@ and `/sessions` makes sense for two separate customers. Write down the `/session
 | 1 | Worked example | done | Ask for JSON in the prompt, feed the reply straight to `JSON.parse`, and count what survives. |
 | 2 | Fill the gap | done | Strip the wrapping and validate the reply with a zod schema. |
 | 3 | From scratch, timed | done | `classify(ticket)` with retry-on-invalid (max 2 retries), with tests; 50 tickets must all be valid. |
-| 4 | Bug hunt | upcoming | A ticket-classifier endpoint has a problem. Find it from the symptoms. |
+| 4 | Bug hunt | current | A ticket-classifier endpoint has a problem. Find it from the symptoms. |
 
 Note: Ollama 0.40.6 ignores `output_config.format` (Claude's constrained decoding), so `client.messages.parse`
 fails on Ollama. This module validates in our own code instead; on Claude you would use both.
@@ -196,6 +196,21 @@ Before running, pick:
 (1) `m3:t3` — how many of the 50 will be valid? a) under 40 b) 40–47 c) 48–50
 (2) `m3:t3:chaos` — a ticket that needed one retry, compared with one that passed first time, sends how many input tokens?
 a) the same b) a little more (just the error message) c) more than double (the whole conversation again, plus the bad reply and the error) d) fewer
+
+### M3 Task 4 — bug hunt
+
+The support team uses a triage endpoint: every ticket is classified, and `high` tickets page the on-call agent.
+Customers with real emergencies say nobody contacted them. The endpoint never crashes and reports zero invalid replies.
+Find the cause from the symptoms, fix it, and re-measure.
+
+```bash
+npm run m3:t4:server   # terminal 1, keep it running (restart it after every change)
+npm run m3:t4:load     # terminal 2: sends 10 tickets (4 are clearly urgent), prints each result and /stats
+```
+
+Done when, on a freshly started server and one load run: the 4 clearly urgent tickets are paged, `byCategory` and
+`byUrgency` look like real tickets, and a reply the endpoint cannot trust shows up in `invalidReplies` instead of
+being quietly turned into something else. Write down `/stats` before and after.
 
 ## How to measure (Module 1)
 
