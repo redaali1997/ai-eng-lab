@@ -1106,7 +1106,7 @@ OK: 2   CRASH (not JSON): 8   WRONG (JSON, bad values): 0   out of 10</pre>
       <ol>
         <li><code>m3:t3</code>: كام من الـ 50 هيطلعوا صح؟ أ) أقل من 40 · ب) 40–47 · ج) 48–50</li>
         <li><code>m3:t3:chaos</code>: شكوى احتاجت retry واحد، بتبعت كام input token مقارنة بشكوى عدّت من أول مرة؟ أ) نفس العدد · ب) أكتر شوية (رسالة الـ error بس) · ج) أكتر من الضعف (المحادثة كلها تاني + الرد الغلط + الـ error) · د) أقل</li>
-      </ol></div><span class="pill">دلوقتي</span></div>
+      </ol></div><span class="pill done">خلص</span></div>
     <div class="task"><span class="rung">Task 4 · Bug hunt</span><div>endpoint بيصنّف الشكاوى، وفيه حاجة غلط. هتلاقيها من الأعراض.</div><span class="pill">جاي</span></div>
   </div>
 
@@ -1123,6 +1123,10 @@ OK: 2   CRASH (not JSON): 8   WRONG (JSON, bad values): 0   out of 10</pre>
     <tr><td>Task 2 · القياس</td><td>2026-10-22</td><td>✓ التوقّع د (9–10) صح. <code>OK: 10 · FAIL json: 0 · FAIL schema: 0</code> من 10، بعد ما كانت 2 (أو 3–5) في Task 1، ونفس الشكاوى ونفس الموديل. اللي اتغيّر الكود بتاعنا بس. 9/9 tests. <b>Task 2 خلص</b></td></tr>
     <tr><td>سؤال الفكرة 4 (المحاولة التانية بتبعت إيه)</td><td>2026-10-22</td><td>✓ ب: الشكوى + الرد الغلط + الـ error</td></tr>
     <tr><td>سؤال الفكرة 5 (محتاج zod مع constrained decoding؟)</td><td>2026-10-22</td><td>✓ ب: أيوه، عشان الرد ممكن يتقطع بسبب <code>max_tokens</code> أو الموديل يرفض يرد</td></tr>
+    <tr><td>Task 3 · المراجعة الأولى</td><td>2026-10-23</td><td>التوقّعات: 1 ج (48–50)، 2 ج (أكتر من الضعف). 8/9 tests. حلقة الـ retry صح، والمحادثة بتكبر صح (3 ثم 5 رسايل). اللي واقع: <code>usage</code> بيتكتب فوقه كل محاولة بدل ما يتجمع، فالتكلفة بتطلع بتاعة آخر محاولة بس. وكمان رد فاضي بيتبعت كـ assistant بـ <code>""</code>، وده الـ Claude API بيرفضه. ولسه مفيش commit</td></tr>
+    <tr><td>Task 3 · سؤالين اختيار من متعدد + التصليح</td><td>2026-10-23</td><td>✓ 1 ب (بتدفع تمن كل محاولة) · ✓ 2 أ (<code>res.text || "(empty reply)"</code>). صلّح الاتنين، وشال الـ import الزيادة، وبقت الرسالة "Reply with corrected JSON only". 9/9 tests</td></tr>
+    <tr><td>Task 3 · القياس (50 شكوى)</td><td>2026-10-23</td><td>✓ التوقّع 1 ج صح: <code>valid 50/50</code>، و0 retries. tokens: in 4850 / out 20012، يعني <b>$0.42</b> لو على Opus. الـ output أكبر من الـ input 4 مرات، عشان الـ thinking (M1)</td></tr>
+    <tr><td>Task 3 · chaos (50 شكوى، حوالي 20% من أول رد متبوّظ)</td><td>2026-10-23</td><td>✓ التوقّع 2 ج صح: شكوى عدّت من أول مرة ≈ 97 input token، وشكوى احتاجت retry ≈ 246–271 (حوالي 2.6×)، وشكوى احتاجت 3 محاولات = 474 (حوالي 4.9×). <code>valid 49/50</code>، و6 شكاوى احتاجت retry، و7 calls زيادة، والتكلفة <b>$0.50</b> بدل $0.42 (+19%). #19 فشلت 3 مرات: جرّبتها 5 مرات تاني، وفي مرة منهم الموديل <b>نسخ رده الغلط</b> (<code>"MEDIUM"</code>) في المحاولة التانية، عشان شايفه في المحادثة. يعني الـ retry مش مضمون، و<code>ok: false</code> لازم يتعامل معاه. <b>Task 3 خلص</b></td></tr>
   </table></div>
 
   <div class="glossary" id="m3-glossary">
