@@ -147,6 +147,7 @@ footer { margin-top: 60px; font-size: 13.5px; color: var(--muted); border-top: 1
   <button role="tab" aria-controls="m1" aria-selected="false">M1 · يعني إيه LLM ✓</button>
   <button role="tab" aria-controls="m2" aria-selected="false">M2 · الموديل مبيفتكرش ✓</button>
   <button role="tab" aria-controls="m3" aria-selected="false">M3 · JSON يدخل الكود ✓</button>
+  <button role="tab" aria-controls="m4" aria-selected="false">M4 · Streaming والأخطاء</button>
 </nav>
 
 <!-- ============ PLAN ============ -->
@@ -1173,7 +1174,364 @@ OK: 2   CRASH (not JSON): 8   WRONG (JSON, bad values): 0   out of 10</pre>
   </div>
 </section>
 
-<footer>Track بطريقة skill-coach · الصفحة دي بتتحدّث مع كل module · آخر تحديث 2026-10-22</footer>
+
+<!-- ============ M4 ============ -->
+<section id="m4" role="tabpanel" hidden>
+  <span class="eyebrow">المستوى 1 · Module 4</span>
+  <h2 style="margin-top:6px">Streaming والأخطاء: الـ call في الـ production</h2>
+
+  <div class="opener">
+    <div>
+      <span class="eyebrow">الحكاية (حقيقية، 11 ديسمبر 2024)</span>
+      <p>OpenAI نزّلت تحديث صغير جوّه السيرفرات بتاعتها. التحديث ده وقّع كل حاجة: ChatGPT والـ API، لمدة حوالي <b>4 ساعات</b>.</p>
+      <p>كل app كان بيكلّم الـ API ده وبس، فضل يطلّع error للزباين بتوعه طول الـ 4 ساعات.</p>
+      <p>والـ apps اللي كان عندها خطة بديلة (موديل تاني، أو رسالة محترمة، أو طابور يستنى) فضلت شغّالة. الفرق ماكانش في الموديل. الفرق كان في الـ backend.</p>
+      <p class="muted" style="font-size:14px">المصدر: <a href="https://status.openai.com/incidents/ctrsv3lwd797/write-up">الـ postmortem الرسمي من OpenAI</a> · <a href="https://techcrunch.com/2024/12/13/openai-blames-its-massive-chatgpt-outage-on-a-new-telemetry-service">TechCrunch</a></p>
+    </div>
+    <div class="teaser">ليه إنك "تحاول تاني" لما الـ API يقع، ممكن تخلّي الوقعة أطول بدل ما تحلّها؟</div>
+    <div>
+      <span class="eyebrow">خط النهاية</span>
+      <div class="finish">
+        <div class="stat bad"><span class="big">~11s</span><div class="lbl">شاشة فاضية لحد ما الرد كله يوصل (قسناها على Ollama: رد 150 كلمة)</div></div>
+        <div class="stat good"><span class="big">&lt; 0.2s</span><div class="lbl">أول حاجة على الشاشة بالـ streaming (قسناها: 137ms)</div></div>
+        <div class="stat good"><span class="big">50/50</span><div class="lbl">request في نفس اللحظة، والـ API بيرد 429 على جزء منهم، وكلهم يعدّوا (تقدير: من غير retry صح هيعدّي ~30 بس)</div></div>
+      </div>
+    </div>
+    <div>
+      <span class="eyebrow">هتقدر...</span>
+      <ul class="cando">
+        <li>تعمل endpoint الرد بتاعه بيظهر كلمة كلمة للزبون، زي ChatGPT</li>
+        <li>تجاوب في interview: "الـ LLM API رجّع 429، تعمل إيه؟"</li>
+        <li>تعدّي اختبار المستوى 1: endpoint بيعمل stream، وبيستحمل 50 request في نفس الوقت</li>
+      </ul>
+    </div>
+    <div>
+      <span class="eyebrow">إنت فين</span>
+      <div class="map">
+        <span class="lv">Beginner</span><span>M1 ✓</span><span>M2 ✓</span><span>M3 ✓</span><span class="here">M4</span>
+        <span class="lv">Intermediate</span><span>M5</span><span>M6</span><span>M7</span><span>M8</span><span>M9</span>
+        <span class="lv">Advanced</span><span>M10</span><span>M11</span><span>M12</span><span>M13</span><span>M14</span>
+        <span class="lv">Pro</span><span>M15</span><span>M16</span><span>M17</span><span>M18</span><span>M19</span>
+      </div>
+    </div>
+    <p class="muted" style="margin:0">الحجم: 6 أفكار صغيرة + 4 tasks في الـ lab · حوالي ساعتين ونص على كذا قعدة.</p>
+  </div>
+
+  <p class="muted">كل الكلمات الجديدة متجمّعة في <a href="#m4-glossary">قاموس في آخر الصفحة</a>.</p>
+
+  <!-- Step 1 -->
+  <div class="step">
+    <span class="step-n">الفكرة 1</span>
+    <h3>الفيديو بيشتغل قبل ما يخلص تحميل</h3>
+    <p>لما تفتح فيديو على YouTube، مش بتستنى الفيديو كله يتحمّل. أول ثانية بتوصل، فيبدأ يشتغل، والباقي بيتحمّل وإنت بتتفرّج.</p>
+    <p>الموديل نفس الحكاية. هو أصلًا بيكتب الرد كلمة ورا كلمة. فبدل ما تستنى لحد ما يخلص الرد كله، ممكن تاخد كل كلمة أول ما تطلع.</p>
+    <p class="keyline">إنك تستلم الرد حتة حتة وهو لسه بيتكتب، اسمه <span class="en">streaming</span>.</p>
+    <figure>
+      <svg viewBox="0 0 620 190" role="img" aria-label="خطين زمن: من غير streaming الشاشة فاضية 11 ثانية، وبالـ streaming حاجة بتظهر بعد 0.1 ثانية والكلام يبدأ من 7.4 ثانية">
+        <text x="10" y="22" class="mut">من غير streaming</text>
+        <rect x="10" y="32" width="540" height="34" rx="6" class="fig-box"/>
+        <text x="280" y="54" text-anchor="middle" class="mut">شاشة فاضية...</text>
+        <rect x="550" y="32" width="60" height="34" rx="6" class="fig-ok"/>
+        <text x="580" y="54" text-anchor="middle">الرد كله</text>
+        <text x="10" y="102" class="mut">بـ streaming</text>
+        <rect x="10" y="112" width="350" height="34" rx="6" class="fig-ok"/>
+        <text x="185" y="134" text-anchor="middle">"بيفكّر..."</text>
+        <rect x="364" y="112" width="246" height="34" rx="6" class="fig-ok"/>
+        <text x="487" y="134" text-anchor="middle">الكلام بيظهر كلمة كلمة</text>
+        <text x="10" y="172" class="m">0.1s</text>
+        <text x="364" y="172" class="m">7.4s</text>
+        <text x="610" y="172" text-anchor="end" class="m">11s</text>
+      </svg>
+      <figcaption>نفس الرد ونفس الوقت الكلي. الفرق إن الزبون شايف حاجة بتحصل من أول لحظة.</figcaption>
+    </figure>
+<pre>const stream = client.messages.stream({ model, max_tokens: 1500, messages });
+for await (const event of stream) {
+  // كل event = حتة صغيرة من الرد
+}</pre>
+    <div class="lab-box"><b>قسناها على Ollama:</b> رد حوالي 150 كلمة. أول event وصل بعد <b>137ms</b>. أول كلمة من الرد نفسه بعد <b>7.4s</b> (قبلها الموديل بيفكّر، فاكر الـ thinking من M1؟). والرد خلص بعد <b>11s</b>. من غير streaming، الزبون كان هيبص على شاشة فاضية 11 ثانية.</div>
+    <div class="lv-box"><span class="lv-tag">من Laravel</span>شبه <code>response()->stream(function () { echo ...; flush(); })</code>. بتبعت للـ browser حتة حتة بدل ما تبني الـ response كله وتبعته مرة واحدة.</div>
+    <div class="check"><b>اتأكد إنك فهمت:</b> شغّلت streaming بدل الـ request العادي. إيه اللي اتغيّر فعلًا؟
+      <ol class="mcq">
+        <li>أ) الرد كله بقى يخلص أسرع بكتير</li>
+        <li>ب) الـ tokens بقت أرخص</li>
+        <li>ج) أول حاجة بتظهر للزبون بقت أبدر بكتير، والوقت الكلي تقريبًا زي ما هو</li>
+        <li>د) الموديل بقى يكتب ردود أحسن</li>
+      </ol>
+      <details><summary>الإجابة</summary><b>ج.</b> الموديل بيكتب بنفس السرعة في الحالتين، وبتدفع نفس الـ tokens. اللي اتغيّر إن الزبون بيستلم كل حتة أول ما تطلع. (أ) هي الغلطة المشهورة: الـ streaming مش بيسرّع الموديل، هو بيخلّي الانتظار مش محسوس.</details></div>
+  </div>
+
+  <!-- Step 2 -->
+  <div class="step">
+    <span class="step-n">الفكرة 2</span>
+    <h3>الرد بييجي في شكل رسايل صغيرة</h3>
+    <p>تخيّل طلب delivery. التطبيق بيبعتلك رسايل: "الطلب اتقبل"، "بيتجهّز"، "مع الطيّار"، "وصل". كل رسالة ليها نوع، وإنت بتعمل حاجة مختلفة مع كل نوع.</p>
+    <p>الـ stream نفس الكلام. مش بييجي نص على طول. بييجي رسايل صغيرة، وكل واحدة مكتوب عليها نوعها.</p>
+    <p class="keyline">كل رسالة صغيرة من دول اسمها <span class="en">event</span>. واللي بيهمّك للشاشة هو <code>text_delta</code>: ده الحتة الجديدة من الرد.</p>
+    <figure>
+      <svg viewBox="0 0 620 200" role="img" aria-label="ترتيب الـ events: message_start، ثم 189 thinking_delta، ثم 34 text_delta، ثم message_delta فيه stop_reason، ثم message_stop">
+        <defs><marker id="ar41" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="var(--muted)"/></marker></defs>
+        <rect x="10" y="20" width="110" height="44" rx="6" class="fig-box"/><text x="65" y="47" text-anchor="middle" class="m">message_start</text>
+        <path d="M122 42 H136" class="fig-line" marker-end="url(#ar41)"/>
+        <rect x="140" y="20" width="130" height="44" rx="6" class="fig-box"/><text x="205" y="40" text-anchor="middle" class="m">thinking_delta</text><text x="205" y="58" text-anchor="middle" class="m">×189</text>
+        <path d="M272 42 H286" class="fig-line" marker-end="url(#ar41)"/>
+        <rect x="290" y="20" width="110" height="44" rx="6" class="fig-ok"/><text x="345" y="40" text-anchor="middle" class="m">text_delta</text><text x="345" y="58" text-anchor="middle" class="m">×34</text>
+        <path d="M402 42 H416" class="fig-line" marker-end="url(#ar41)"/>
+        <rect x="420" y="20" width="100" height="44" rx="6" class="fig-box"/><text x="470" y="47" text-anchor="middle" class="m">message_delta</text>
+        <path d="M522 42 H536" class="fig-line" marker-end="url(#ar41)"/>
+        <rect x="540" y="20" width="76" height="44" rx="6" class="fig-box"/><text x="578" y="47" text-anchor="middle" class="m">stop</text>
+        <text x="65" y="96" text-anchor="middle" class="mut">ابدأ</text>
+        <text x="205" y="96" text-anchor="middle" class="mut">اعرض "بيفكّر..."</text>
+        <text x="345" y="96" text-anchor="middle">اعرضها للزبون</text>
+        <text x="470" y="96" text-anchor="middle" class="mut">فيه stop_reason</text>
+        <text x="578" y="96" text-anchor="middle" class="mut">خلص</text>
+        <rect x="290" y="120" width="110" height="60" rx="6" class="fig-ok"/>
+        <text x="345" y="145" text-anchor="middle" class="m">"Hi"</text>
+        <text x="345" y="167" text-anchor="middle" class="m">" there"</text>
+      </svg>
+      <figcaption>دي الأرقام الحقيقية من رد واحد على Ollama. الزبون محتاج الأخضر بس.</figcaption>
+    </figure>
+<pre>for await (const ev of stream) {
+  if (ev.type === "content_block_delta" &amp;&amp; ev.delta.type === "text_delta") {
+    send(ev.delta.text);   // الحتة الجديدة بس
+  }
+}</pre>
+    <div class="check"><b>اتأكد إنك فهمت:</b> بتبني شات للزباين. أنهي event تبعت نصّه للشاشة؟
+      <ol class="mcq">
+        <li>أ) كل الـ events زي ما هي</li>
+        <li>ب) <code>thinking_delta</code>، عشان ده تفكير الموديل والزبون يحب يشوفه</li>
+        <li>ج) <code>message_stop</code> بس، عشان ساعتها الرد يبقى كامل</li>
+        <li>د) <code>text_delta</code>، وكل واحدة فيها الحتة الجديدة من الرد</li>
+      </ol>
+      <details><summary>الإجابة</summary><b>د.</b> <code>text_delta</code> هو الرد نفسه، حتة حتة. (ب) مغرية، بس الـ thinking ده مسودّة الموديل، مش كلام للزبون، وممكن يكون فيه حاجات مش عايز تعرضها. و(ج) يرجّعك للشاشة الفاضية تاني.</details></div>
+  </div>
+
+  <!-- Step 3 -->
+  <div class="step">
+    <span class="step-n">الفكرة 3</span>
+    <h3>الجواب خلص، ولا الورق هو اللي خلص؟</h3>
+    <p>تخيّل حد بيكتبلك جواب، والورق خلص منه في نص جملة. الجواب "وصل"، بس ناقص. ولو ماخدتش بالك، هتفتكره كامل.</p>
+    <p>الموديل بيقولك هو وقف ليه. لو خلص كلامه، بيقول <code>end_turn</code>. لو الـ <code>max_tokens</code> خلصت، بيقول <code>max_tokens</code>. ولو رفض يكمّل، بيقول <code>refusal</code>.</p>
+    <p class="keyline">السبب ده اسمه <span class="en">stop_reason</span>. والكود الصح بيبص عليه قبل ما يستخدم الرد.</p>
+    <figure>
+      <svg viewBox="0 0 620 170" role="img" aria-label="جواب كامل stop_reason end_turn على الشمال، وجواب مقطوع في النص stop_reason max_tokens على اليمين">
+        <rect x="10" y="10" width="280" height="110" rx="8" class="fig-ok"/>
+        <text x="150" y="40" text-anchor="middle">"طلبك هيوصل بكرة.</text>
+        <text x="150" y="64" text-anchor="middle">آسفين على التأخير."</text>
+        <text x="150" y="100" text-anchor="middle" class="m">stop_reason: "end_turn"</text>
+        <rect x="330" y="10" width="280" height="110" rx="8" class="fig-bad"/>
+        <text x="470" y="40" text-anchor="middle">"طلبك هيوصل</text>
+        <text x="470" y="64" text-anchor="middle">بـ...</text>
+        <text x="470" y="100" text-anchor="middle" class="m">stop_reason: "max_tokens"</text>
+        <text x="150" y="150" text-anchor="middle" class="mut">استخدمه ✓</text>
+        <text x="470" y="150" text-anchor="middle" class="mut">ماتبعتهوش للزبون كأنه كامل ✗</text>
+      </svg>
+      <figcaption>الاتنين وصلوا من غير error. الفرق الوحيد في <code>stop_reason</code>.</figcaption>
+    </figure>
+<pre>if (res.stop_reason === "max_tokens") { /* ناقص: زوّد max_tokens أو قول إنه اتقطع */ }
+if (res.stop_reason === "refusal")    { /* رفض: رسالة محترمة، مش retry */ }</pre>
+    <div class="lab-box"><b>جرّبناها على Ollama:</b> <code>max_tokens: 5</code> رجّع <code>stop_reason: "max_tokens"</code>، والـ content فيه block واحد بس من نوع <code>thinking</code>. يعني <b>مفيش text خالص</b>. فاكر Task 4 في M1؟ 8 من 10 ردود طلعت فاضية بالظبط كده. ده السطر اللي كان ناقص هناك.</div>
+    <div class="check"><b>اتأكد إنك فهمت:</b> الرد جه بـ <code>stop_reason: "max_tokens"</code> والـ content فيه <code>thinking</code> بس. الكود الصح يعمل إيه؟
+      <ol class="mcq">
+        <li>أ) يرجّع للزبون نص فاضي، عشان مفيش error</li>
+        <li>ب) يعرف إن الرد ناقص، ويتعامل معاه: يزوّد <code>max_tokens</code> ويبعت تاني، أو يرجّع رسالة واضحة</li>
+        <li>ج) يعرض الـ thinking مكان الرد</li>
+        <li>د) يرمي الـ request ويعمل retry بنفس الـ <code>max_tokens</code> لحد ما ينجح</li>
+      </ol>
+      <details><summary>الإجابة</summary><b>ب.</b> الـ API ماغلطش، إنت اللي إديته مساحة صغيرة. فلازم تقرا <code>stop_reason</code> وتقرّر. (د) مغرية، بس بنفس الـ <code>max_tokens</code> هيتقطع تاني غالبًا وإنت بتدفع كل مرة. و(أ) هي بالظبط اللي حصلت في M1.</details></div>
+  </div>
+
+  <!-- Step 4 -->
+  <div class="step">
+    <span class="step-n">الفكرة 4</span>
+    <h3>الخط مشغول، ولا الرقم غلط؟</h3>
+    <p>بتتصل بحد. لو الخط <b>مشغول</b>، تستنى شوية وتتصل تاني، وغالبًا هتلحقه. بس لو قالك "الرقم ده غير موجود"، تتصل تاني ليه؟ هيقولك نفس الكلام كل مرة.</p>
+    <p>الـ API نفس الحكاية. فيه errors معناها "مشغول، جرّب كمان شوية": <code>429</code> (بعتّ كتير أوي في وقت قليل)، و<code>529</code> (السيرفر عليه ضغط)، و<code>500</code>، والـ timeout. وفيه errors معناها "الطلب نفسه غلط": <code>400</code> و<code>401</code> و<code>404</code>.</p>
+    <p class="keyline">الـ error اللي ينفع تحاول بعده تاني اسمه <span class="en">retryable</span>. والباقي retry عليه = فلوس ووقت ضايعين.</p>
+    <figure>
+      <svg viewBox="0 0 620 200" role="img" aria-label="عمودين: errors ينفع تعمل لها retry زي 429 و529 و500 والـ timeout، وerrors مايتعملهاش retry زي 400 و401 و404">
+        <rect x="10" y="10" width="290" height="180" rx="8" class="fig-ok"/>
+        <text x="155" y="36" text-anchor="middle">جرّب تاني ↻ (مشغول)</text>
+        <text x="40" y="70" class="m">429  rate_limit_error</text>
+        <text x="40" y="98" class="m">529  overloaded_error</text>
+        <text x="40" y="126" class="m">500  api_error</text>
+        <text x="40" y="154" class="m">timeout / connection</text>
+        <rect x="320" y="10" width="290" height="180" rx="8" class="fig-bad"/>
+        <text x="465" y="36" text-anchor="middle">ماتجرّبش تاني ✗ (الطلب غلط)</text>
+        <text x="350" y="70" class="m">400  invalid_request_error</text>
+        <text x="350" y="98" class="m">401  authentication_error</text>
+        <text x="350" y="126" class="m">404  not_found_error</text>
+        <text x="350" y="160" class="mut">صلّح الطلب نفسه</text>
+      </svg>
+      <figcaption>السؤال قبل أي retry: هل المرة الجاية ممكن تنجح من غير ما أغيّر حاجة؟</figcaption>
+    </figure>
+<pre>try { await client.messages.create(...) }
+catch (e) {
+  if (e instanceof Anthropic.APIError) console.log(e.status);  // 429, 529, 400...
+}</pre>
+    <div class="lab-box"><b>جرّبناها على Ollama:</b> موديل اسمه غلط رجّع <code>NotFoundError</code> بـ <code>status 404</code> ونوع <code>not_found_error</code>، نفس شكل Claude بالظبط. و<code>{ timeout: 300 }</code> رجّع <code>APIConnectionTimeoutError</code> من غير status. بس Ollama <b>عمره ما بيرجّع 429</b>: لو ضغطت عليه، بيحط الطلبات في طابور ويستنى. عشان كده في الـ lab هنعمل API وهمي بيرجّع 429.</div>
+    <div class="check"><b>اتأكد إنك فهمت:</b> الـ API رجّع <code>400 invalid_request_error</code> عشان الـ <code>messages</code> فاضية. تعمل إيه؟
+      <ol class="mcq">
+        <li>أ) retry 3 مرات، يمكن السيرفر كان مضغوط</li>
+        <li>ب) تستنى دقيقة وتبعت نفس الطلب</li>
+        <li>ج) ماتعملش retry. ده bug في الطلب نفسه، صلّحه أو سجّله</li>
+        <li>د) تغيّر الموديل وتبعت نفس الطلب</li>
+      </ol>
+      <details><summary>الإجابة</summary><b>ج.</b> 400 معناه إن الطلب نفسه غلط، فكل مرة هيرجع نفس الـ error. (أ) هي الغلطة المشهورة: retry على كل error من غير ما تفرّق. و(د) نفس الطلب الغلط هيترفض من أي موديل.</details></div>
+  </div>
+
+  <!-- Step 5 -->
+  <div class="step">
+    <span class="step-n">الفكرة 5</span>
+    <h3>50 واحد بيتصلوا تاني في نفس الثانية</h3>
+    <p>تخيّل مطعم والتليفون بتاعه مشغول. 50 واحد اتصلوا ولقوه مشغول، وكلهم قرّروا: "أستنى ثانية بالظبط وأتصل تاني". بعد ثانية، الـ 50 بيتصلوا مع بعض، والخط مشغول تاني. وهكذا.</p>
+    <p>الحل جزئين. (1) كل مرة تفشل، استنى ضعف المرة اللي قبلها: نص ثانية، ثانية، 2، 4. (2) زوّد على الانتظار ده رقم عشوائي صغير، عشان الـ 50 مايرجعوش في نفس اللحظة.</p>
+    <p class="keyline">الانتظار اللي بيتضاعف اسمه <span class="en">exponential backoff</span>. والرقم العشوائي اللي بيفرّقهم اسمه <span class="en">jitter</span>.</p>
+    <figure>
+      <svg viewBox="0 0 620 210" role="img" aria-label="على الشمال كل الـ requests بترجع في نفس اللحظة وتعمل زحمة تانية، وعلى اليمين بالـ backoff والـ jitter بترجع متفرّقة">
+        <text x="150" y="20" text-anchor="middle" class="mut">retry بعد 1s بالظبط</text>
+        <rect x="10" y="30" width="280" height="140" rx="8" class="fig-bad"/>
+        <rect x="40" y="60" width="30" height="100" class="fig-line"/>
+        <rect x="130" y="60" width="30" height="100" class="fig-line"/>
+        <rect x="220" y="60" width="30" height="100" class="fig-line"/>
+        <text x="55" y="52" text-anchor="middle" class="m">429</text>
+        <text x="145" y="52" text-anchor="middle" class="m">429</text>
+        <text x="235" y="52" text-anchor="middle" class="m">429</text>
+        <text x="150" y="196" text-anchor="middle" class="mut">الـ 50 مع بعض كل مرة</text>
+        <text x="470" y="20" text-anchor="middle" class="mut">backoff + jitter</text>
+        <rect x="330" y="30" width="280" height="140" rx="8" class="fig-ok"/>
+        <rect x="350" y="130" width="10" height="30" class="fig-line"/><rect x="372" y="120" width="10" height="40" class="fig-line"/>
+        <rect x="398" y="135" width="10" height="25" class="fig-line"/><rect x="430" y="125" width="10" height="35" class="fig-line"/>
+        <rect x="462" y="140" width="10" height="20" class="fig-line"/><rect x="500" y="130" width="10" height="30" class="fig-line"/>
+        <rect x="540" y="138" width="10" height="22" class="fig-line"/><rect x="580" y="142" width="10" height="18" class="fig-line"/>
+        <text x="470" y="196" text-anchor="middle" class="mut">متفرّقين، والسيرفر يلحق</text>
+      </svg>
+      <figcaption>نفس عدد الـ requests. الفرق إمتى بيرجعوا.</figcaption>
+    </figure>
+<pre>const base = 500 * 2 ** attempt;           // 500, 1000, 2000, 4000 ms
+const wait = base * (1 - Math.random() * 0.25);  // jitter</pre>
+    <div class="lab-box"><b>اتأكدنا من الـ SDK نفسه (0.135.0):</b> <code>@anthropic-ai/sdk</code> بيعمل ده لوحده. <code>maxRetries</code> الافتراضي 2، وبيبدأ بـ 0.5s ويتضاعف لحد 8s، ويشيل لحد 25% عشوائي. وبيعمل retry على 408 و409 و429 و5xx والـ timeout بس. ولو السيرفر قاله "استنى X ثانية" في header اسمه <code>retry-after</code>، بيسمع الكلام. يعني الغلطة الحقيقية مش إنك تنسى الـ retry، الغلطة إنك تعمل retry بتاعك <b>فوق</b> بتاع الـ SDK من غير ما تعرف.</div>
+    <div class="lv-box"><span class="lv-tag">من Laravel</span><code>Http::retry(3, 100)</code> أو الـ helper <code>retry(3, fn, 100)</code>. نفس الفكرة، بس الاتنين بيستنوا مدة ثابتة لو ماحطّيتش backoff بنفسك.</div>
+    <div class="check"><b>اتأكد إنك فهمت:</b> عندك retry بتاعك 3 مرات، والـ SDK عنده <code>maxRetries: 2</code> زي ما هو. request واحد فضل يرجّع 429. هيتبعت كام مرة؟
+      <ol class="mcq">
+        <li>أ) 3 مرات</li>
+        <li>ب) 4 مرات</li>
+        <li>ج) حوالي 12 مرة</li>
+        <li>د) مرة واحدة</li>
+      </ol>
+      <details><summary>الإجابة</summary><b>ج.</b> كل محاولة من محاولاتك (1 + 3 = 4) جوّاها الـ SDK بيحاول 3 مرات (1 + 2). يعني 4 × 3 = 12 request على API هو أصلًا مضغوط. (ب) مغرية لو نسيت إن الـ SDK بيعمل retry لوحده. عشان كده يا إما تسيب الـ SDK يعملها، يا إما تحط <code>maxRetries: 0</code> وتعمل بتاعك.</details></div>
+  </div>
+
+  <!-- Step 6 -->
+  <div class="step">
+    <span class="step-n">الفكرة 6</span>
+    <h3>استنيت كفاية؟ روح مطعم تاني</h3>
+    <p>إنت في مطعم، والأكل اتأخر. هتستنى قد إيه؟ لازم يبقى عندك حد: "لو عدّى نص ساعة، همشي". ولما تمشي، يبقى عندك مكان تاني تروحه.</p>
+    <p>نفس الكلام في الـ backend. أقصى وقت تستناه للـ request اسمه <span class="en">timeout</span>. ولما يعدّي، أو الـ retries تخلص، بتروح للخطة البديلة.</p>
+    <p class="keyline">الخطة البديلة دي اسمها <span class="en">fallback</span>: موديل تاني، أو provider تاني، أو رد جاهز محترم، أو "هنرد عليك في الإيميل".</p>
+    <figure>
+      <svg viewBox="0 0 620 170" role="img" aria-label="الـ request يروح للموديل الأساسي، لو فشل بعد الـ retries أو الـ timeout يروح للـ fallback، ولو فشل يرجّع رسالة محترمة">
+        <defs><marker id="ar46" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="var(--muted)"/></marker></defs>
+        <rect x="10" y="50" width="120" height="50" rx="8" class="fig-box"/><text x="70" y="80" text-anchor="middle">الـ request</text>
+        <path d="M132 75 H166" class="fig-line" marker-end="url(#ar46)"/>
+        <rect x="170" y="50" width="130" height="50" rx="8" class="fig-ok"/><text x="235" y="72" text-anchor="middle">الموديل الأساسي</text><text x="235" y="92" text-anchor="middle" class="m">retry + timeout</text>
+        <path d="M302 75 H336" class="fig-line" marker-end="url(#ar46)"/>
+        <text x="319" y="66" text-anchor="middle" class="mut">فشل</text>
+        <rect x="340" y="50" width="130" height="50" rx="8" class="fig-box"/><text x="405" y="72" text-anchor="middle">fallback</text><text x="405" y="92" text-anchor="middle" class="mut">موديل تاني</text>
+        <path d="M472 75 H506" class="fig-line" marker-end="url(#ar46)"/>
+        <text x="489" y="66" text-anchor="middle" class="mut">فشل</text>
+        <rect x="510" y="50" width="100" height="50" rx="8" class="fig-bad"/><text x="560" y="72" text-anchor="middle">رسالة</text><text x="560" y="92" text-anchor="middle">محترمة</text>
+        <text x="310" y="150" text-anchor="middle" class="mut">في كل الحالات الزبون بياخد رد، مش 500</text>
+      </svg>
+      <figcaption>كل سهم "فشل" معناه إن فيه خطة جاهزة، مش crash.</figcaption>
+    </figure>
+<pre>const res = await client.messages.create(params, { timeout: 20_000 })   // 20s
+  .catch(() =&gt; backup.messages.create(params))      // fallback
+  .catch(() =&gt; ({ text: "We'll get back to you shortly." }));</pre>
+    <div class="check"><b>اتأكد إنك فهمت:</b> ده يوم 11 ديسمبر 2024، والـ API الأساسي واقع 4 ساعات. app عنده retry ممتاز بس مفيش fallback. الزبون هيشوف إيه؟
+      <ol class="mcq">
+        <li>أ) الرد عادي، عشان الـ retry هيلحقه</li>
+        <li>ب) error، بس بعد وقت أطول (الـ retries كلها فشلت الأول)</li>
+        <li>ج) رد من موديل تاني</li>
+        <li>د) الـ request هيفضل مستني لحد ما الـ API يرجع</li>
+      </ol>
+      <details><summary>الإجابة</summary><b>ب.</b> الـ retry بيحل مشكلة ثواني (زحمة، 429). مش بيحل وقعة 4 ساعات. فالزبون هيستنى الـ retries كلها، وفي الآخر ياخد error. (أ) هي اللي بيفتكرها ناس كتير: إن الـ retry بديل عن الـ fallback. و(د) مش هيحصل عشان فيه timeout.</details></div>
+  </div>
+
+  <h2>غلطات مشهورة</h2>
+  <ul>
+    <li>تفتكر إن الـ streaming بيسرّع الموديل. هو بيخلّي أول حاجة تظهر بدري، بس الوقت الكلي زي ما هو.</li>
+    <li>تبعت كل الـ events للزبون، فيشوف الـ thinking أو JSON غريب على الشاشة.</li>
+    <li>تستخدم الرد من غير ما تبص على <code>stop_reason</code>، فرد مقطوع (أو فاضي) يتبعت كأنه كامل.</li>
+    <li>تعمل retry على كل error، حتى 400 و401.</li>
+    <li>تعمل retry بانتظار ثابت ومن غير jitter، فكل الـ requests ترجع مع بعض.</li>
+    <li>تحط retry بتاعك فوق retry الـ SDK من غير ما تعرف، فالـ request الواحد يتبعت 12 مرة.</li>
+    <li>مفيش timeout، فـ request واحد واقف يفضل ماسك connection دقايق.</li>
+  </ul>
+
+  <h2>الـ Tasks في الـ lab</h2>
+  <div class="tasks">
+    <div class="task"><span class="rung">Task 1 · مثال محلول</span><div><b>نفس الرد، بطريقتين:</b> في <code>src/m4/task-1/server.ts</code> فيه endpointين. <code>/reply/wait</code> بيستنى الرد كله ويبعته مرة واحدة. و<code>/reply/stream</code> بيبعته حتة حتة (<span class="en">SSE</span>، يعني الـ server بيفضل فاتح الـ response ويكتب فيه event ورا event). و<code>measure.ts</code> بيعمل warm-up call، وبعدين 3 جولات، وبياخد الـ median. وممكن تفتح <code>http://localhost:3041</code> وتشوف الاتنين جنب بعض.
+      اقرا <code>replyStream</code> الأول، واختار توقّعك <b>قبل</b> ما تشغّل <code>npm run m4:t1:server</code> وبعدين <code>npm run m4:t1</code>:
+      <ol>
+        <li>في الـ stream، "first anything" (أول لحظة الـ browser يقدر يعرض فيها أي حاجة): أ) أقل من 0.5s · ب) 1–3s · ج) 3–6s · د) نفس الوقت الكلي بتاع <code>wait</code></li>
+        <li>في الـ stream، "first word" (أول كلمة من الرد نفسه): أ) برضه أقل من 0.5s · ب) بعدها بكام ثانية، لما الـ thinking يخلص · ج) نفس الوقت الكلي بتاع <code>wait</code></li>
+        <li>الوقت الكلي للـ stream مقارنة بـ <code>wait</code>: أ) الـ stream دايمًا أسرع بكتير · ب) قريبين من بعض، والاتنين بيتغيّروا من جولة للتانية · ج) الـ stream دايمًا أبطأ بكتير</li>
+      </ol>
+      <details><summary>النتيجة الحقيقية (افتحها بعد ما تختار وتشغّل)</summary>
+<pre>stream #1  first anything 0.12s · first word 7.25s · total 11.27s
+wait   #1  first anything 9.06s · first word 9.06s · total  9.06s
+stream #2  first anything 0.12s · first word 1.90s · total  4.98s
+wait   #2  first anything 11.64s · first word 11.64s · total 11.64s
+stream #3  first anything 0.11s · first word 2.86s · total  5.99s
+wait   #3  first anything 5.72s · first word 5.72s · total  5.72s
+=== median of 3 rounds ===
+stream     first anything 0.12s · first word 2.86s · total 5.99s
+wait       first anything 9.06s · first word 9.06s · total 9.06s</pre>
+        <b>1 أ، 2 ب، 3 ب.</b> الـ event الأول (<code>thinking</code>) بيوصل بعد حوالي 0.12s، فالـ browser يقدر يكتب "بيفكّر..." على طول. وأول كلمة بتيجي لما الـ thinking يخلص، وده بيفرق جامد من رد للتاني (1.9s مرة و7.25s مرة). والوقت الكلي مش بيتحدد بالطريقة. بيتحدد بطول الـ thinking والرد في الجولة دي، عشان كده مرة الـ stream أسرع ومرة الـ wait.
+        <b>وخلّي بالك من الـ warm-up:</b> أول call بعد ما الموديل كان واقف خد حوالي 5s زيادة، عشان Ollama كان بيحمّله في الـ memory. ولو كنّا حسبناه، المقارنة كانت هتبقى ظالمة.
+      </details>
+    </div><span class="pill now">دلوقتي</span></div>
+    <div class="task"><span class="rung">Task 2 · كمّل الناقص</span><div><b>مين يستاهل retry؟</b> <code>isRetryable(error)</code> و<code>backoffDelay(attempt)</code>، ومعاهم tests.</div><span class="pill">جاي</span></div>
+    <div class="task"><span class="rung">Task 3 · من الصفر، 20 دقيقة</span><div><b>retry + timeout + fallback:</b> function واحدة بتلف أي call للموديل، وtests بموديل وهمي بيقع بطرق مختلفة.</div><span class="pill">جاي</span></div>
+    <div class="task"><span class="rung">Task 4 · Bug hunt</span><div><b>50 request مع بعض:</b> API وهمي بيرجّع 429 لما يتضغط، وendpoint فيه مشكلة مستخبية. لاقيها من الأرقام.</div><span class="pill">جاي</span></div>
+  </div>
+
+  <h2>سجل الأدلة</h2>
+  <div class="tablewrap"><table>
+    <tr><th>الـ task</th><th>التاريخ</th><th>النتيجة</th></tr>
+    <tr><td>تجربة قبل الـ module (من عندي)</td><td>2026-10-24</td><td>Ollama: الـ streaming شغّال. رد قصير: 189 <code>thinking_delta</code> ثم 34 <code>text_delta</code>. رد 150 كلمة: أول event 137ms، وأول كلمة 7.4s، والآخر 11s. <code>max_tokens: 5</code> ← <code>thinking</code> بس من غير text. موديل غلط ← 404 <code>not_found_error</code>. timeout ← <code>APIConnectionTimeoutError</code>. ومفيش 429 على Ollama</td></tr>
+    <tr><td>مراجعة متباعدة (M2 + M3)، 3 أسئلة</td><td>2026-10-24</td><td>✓ 3/3: الـ API stateless ← ب · <code>.catch("low")</code> بيحوّل <code>"High"</code> لـ low ساكت ← ج · الـ retry بيكبّر الـ input ~2.6× ← أ</td></tr>
+    <tr><td>سؤال الفكرة 1 (الـ streaming بيغيّر إيه)</td><td>2026-10-25</td><td>✓ ج: أول حاجة بتظهر أبدر، والوقت الكلي زي ما هو</td></tr>
+    <tr><td>سؤال الفكرة 2 (أنهي event للشاشة)</td><td>2026-10-26</td><td>✓ د: <code>text_delta</code></td></tr>
+  </table></div>
+
+  <div class="glossary" id="m4-glossary">
+    <b>قاموس M4</b> <span class="from">بترتيب ما اتعلّمنا</span>
+    <dl>
+      <dt>streaming</dt><dd>تستلم الرد حتة حتة وهو لسه بيتكتب، بدل ما تستنى يخلص كله.</dd>
+      <dt>event</dt><dd>رسالة صغيرة في الـ stream مكتوب عليها نوعها (<code>text_delta</code> هي الحتة الجديدة من الرد).</dd>
+      <dt>stop_reason</dt><dd>الموديل وقف ليه: خلص (<code>end_turn</code>)، أو المساحة خلصت (<code>max_tokens</code>)، أو رفض (<code>refusal</code>).</dd>
+      <dt>retryable</dt><dd>error ممكن المرة الجاية تنجح بعده من غير ما تغيّر حاجة (429، 529، 5xx، timeout).</dd>
+      <dt>exponential backoff</dt><dd>كل ما تفشل، تستنى ضعف المرة اللي فاتت قبل ما تحاول تاني.</dd>
+      <dt>jitter</dt><dd>رقم عشوائي صغير على الانتظار، عشان الـ requests مايرجعوش كلهم في نفس اللحظة.</dd>
+      <dt>timeout</dt><dd>أقصى وقت تستناه للـ request قبل ما تعتبره فشل.</dd>
+      <dt>fallback</dt><dd>الخطة البديلة لما الأساسي يفشل: موديل تاني، أو رد جاهز محترم.</dd>
+    </dl>
+  </div>
+
+  <h2>أسئلة المراجعة</h2>
+  <div class="check"><b>1.</b> الـ streaming بيحسّن إيه بالظبط؟
+    <ol class="mcq"><li>أ) الوقت الكلي للرد</li><li>ب) تمن الـ tokens</li><li>ج) الوقت لحد أول حاجة تظهر للزبون</li><li>د) جودة الرد</li></ol>
+    <details><summary>الإجابة</summary><b>ج.</b> الموديل بيكتب بنفس السرعة. الزبون بس بيشوف الكلام أول ما يطلع.</details></div>
+  <div class="check"><b>2.</b> أنهي error من دول <b>مش</b> retryable؟
+    <ol class="mcq"><li>أ) <code>429 rate_limit_error</code></li><li>ب) <code>401 authentication_error</code></li><li>ج) <code>529 overloaded_error</code></li><li>د) timeout</li></ol>
+    <details><summary>الإجابة</summary><b>ب.</b> الـ key غلط، وهيفضل غلط في كل محاولة. الباقي معناه "مشغول، جرّب كمان شوية".</details></div>
+  <div class="check"><b>3.</b> ليه الـ jitter مهم مع الـ backoff؟
+    <ol class="mcq"><li>أ) عشان الـ requests مترجعش كلها في نفس اللحظة وتعمل زحمة تانية</li><li>ب) عشان يقلّل عدد الـ retries</li><li>ج) عشان الـ API بيطلبه</li><li>د) عشان يخلّي الانتظار أقصر</li></ol>
+    <details><summary>الإجابة</summary><b>أ.</b> من غيره، كل اللي فشلوا مع بعض هيرجعوا مع بعض ويفشلوا مع بعض تاني.</details></div>
+</section>
+
+<footer>Track بطريقة skill-coach · الصفحة دي بتتحدّث مع كل module · آخر تحديث 2026-10-24</footer>
 </div>
 
 <script>
@@ -1188,7 +1546,7 @@ OK: 2   CRASH (not JSON): 8   WRONG (JSON, bad values): 0   out of 10</pre>
     try { localStorage.setItem('aieng-tab', id); } catch (e) {}
   };
   tabs.forEach((t) => t.addEventListener('click', () => { show(t.getAttribute('aria-controls')); history.replaceState(null, '', '#' + t.getAttribute('aria-controls')); }));
-  ['m1-glossary','m2-glossary','m3-glossary'].forEach((g) => document.querySelectorAll('a[href="#' + g + '"]').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); document.getElementById(g).scrollIntoView({ behavior: 'smooth' }); })));
+  ['m1-glossary','m2-glossary','m3-glossary','m4-glossary'].forEach((g) => document.querySelectorAll('a[href="#' + g + '"]').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); document.getElementById(g).scrollIntoView({ behavior: 'smooth' }); })));
   let start = location.hash.slice(1);
   if (start.endsWith('-glossary')) start = start.split('-')[0];
   if (!tabs.some((t) => t.getAttribute('aria-controls') === start)) { try { start = localStorage.getItem('aieng-tab') || 'plan'; } catch (e) { start = 'plan'; } }

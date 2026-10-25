@@ -212,6 +212,33 @@ Done when, on a freshly started server and one load run: the 4 clearly urgent ti
 `byUrgency` look like real tickets, and a reply the endpoint cannot trust shows up in `invalidReplies` instead of
 being quietly turned into something else. Write down `/stats` before and after.
 
+## Module 4 — Streaming and errors: the call in production
+
+| Task | Rung | Status | What |
+|---|---|---|---|
+| 1 | Worked example | current | The same reply sent two ways: wait for all of it, or stream it piece by piece (SSE). Time both. |
+| 2 | Fill the gap | upcoming | Which errors deserve a retry, and how long to wait before it. |
+| 3 | From scratch, timed | upcoming | Retry + timeout + fallback around any model call, with tests. |
+| 4 | Bug hunt | upcoming | 50 concurrent requests against an API that answers 429 under load. |
+
+Note: Ollama never returns 429 (it queues requests instead), so later tasks use a fake API that does.
+
+### M4 Task 1 — how to run
+
+```bash
+npm run m4:t1:server   # terminal 1, keep it running
+npm run m4:t1          # terminal 2: 1 warm-up call, then 3 rounds of stream vs wait (about 1 minute)
+```
+
+Or open http://localhost:3041 and press "Send to both" to watch the two replies side by side.
+Read `src/m4/task-1/server.ts` (`replyStream`) and `measure.ts` first.
+
+Before running, pick: (1) `stream` "first anything" (the moment the browser can show *something*):
+a) under 0.5s b) 1–3s c) 3–6s d) the same as `wait`'s total
+(2) `stream` "first word" of the actual reply: a) under 0.5s too b) a few seconds later, once thinking ends
+c) the same as `wait`'s total (3) `stream` total vs `wait` total: a) stream is always much faster
+b) roughly similar, and both change from round to round c) stream is always much slower
+
 ## How to measure (Module 1)
 
 - Task 1: count how many of the 5 runs are `NEW - never written anywhere`, in both modes.

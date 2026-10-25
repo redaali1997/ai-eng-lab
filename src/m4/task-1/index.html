@@ -1,0 +1,57 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>M4 · Task 1 · wait vs stream</title>
+<style>
+  body { font: 16px/1.5 system-ui, sans-serif; max-width: 960px; margin: 24px auto; padding: 0 16px; }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .box { border: 1px solid #ccc; border-radius: 8px; padding: 12px; min-height: 240px; white-space: pre-wrap; }
+  .t { color: #666; font-size: 13px; font-family: ui-monospace, monospace; }
+  textarea { width: 100%; }
+</style>
+<h1>wait vs stream</h1>
+<textarea id="msg" rows="2">Reply to an angry customer whose order 4417 arrived broken. About 150 words.</textarea>
+<p><button id="go">Send to both</button></p>
+<div class="cols">
+  <div><b>/reply/wait</b> <span class="t" id="tw"></span><div class="box" id="w"></div></div>
+  <div><b>/reply/stream</b> <span class="t" id="ts"></span><div class="box" id="s"></div></div>
+</div>
+<script>
+const $ = (id) => document.getElementById(id);
+const post = (url) => fetch(url, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ message: $("msg").value }) });
+
+async function wait() {
+  const t0 = performance.now();
+  $("w").textContent = ""; $("tw").textContent = "waiting...";
+  const r = await (await post("/reply/wait")).json();
+  $("w").textContent = r.text;
+  $("tw").textContent = `everything at ${Math.round(performance.now() - t0)}ms · ${r.stop_reason}`;
+}
+
+async function stream() {
+  const t0 = performance.now();
+  const ms = () => Math.round(performance.now() - t0);
+  let firstText = 0;
+  $("s").textContent = ""; $("ts").textContent = "";
+  const reader = (await post("/reply/stream")).body.pipeThrough(new TextDecoderStream()).getReader();
+  let buf = "";
+  for (;;) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buf += value;
+    const parts = buf.split("\n\n");
+    buf = parts.pop();
+    for (const part of parts) {
+      const event = part.match(/^event: (.*)$/m)?.[1];
+      const data = JSON.parse(part.match(/^data: (.*)$/m)?.[1] ?? "{}");
+      if (event === "thinking") $("s").textContent = `thinking... (${ms()}ms)`;
+      if (event === "text") {
+        if (!firstText) { firstText = ms(); $("s").textContent = ""; }
+        $("s").textContent += data.text;
+      }
+      if (event === "done") $("ts").textContent = `first word ${firstText}ms · last ${ms()}ms · ${data.stop_reason}`;
+    }
+  }
+}
+
+$("go").onclick = () => { wait(); stream(); };
+</script>
