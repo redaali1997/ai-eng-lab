@@ -1490,7 +1490,7 @@ wait       first anything 9.06s · first word 9.06s · total 9.06s</pre>
         <b>1 أ، 2 ب، 3 ب.</b> الـ event الأول (<code>thinking</code>) بيوصل بعد حوالي 0.12s، فالـ browser يقدر يكتب "بيفكّر..." على طول. وأول كلمة بتيجي لما الـ thinking يخلص، وده بيفرق جامد من رد للتاني (1.9s مرة و7.25s مرة). والوقت الكلي مش بيتحدد بالطريقة. بيتحدد بطول الـ thinking والرد في الجولة دي، عشان كده مرة الـ stream أسرع ومرة الـ wait.
         <b>وخلّي بالك من الـ warm-up:</b> أول call بعد ما الموديل كان واقف خد حوالي 5s زيادة، عشان Ollama كان بيحمّله في الـ memory. ولو كنّا حسبناه، المقارنة كانت هتبقى ظالمة.
       </details>
-    </div><span class="pill now">دلوقتي</span></div>
+    </div><span class="pill done">خلص</span></div>
     <div class="task"><span class="rung">Task 2 · كمّل الناقص</span><div><b>مين يستاهل retry؟</b> <code>isRetryable(error)</code> و<code>backoffDelay(attempt)</code>، ومعاهم tests.</div><span class="pill">جاي</span></div>
     <div class="task"><span class="rung">Task 3 · من الصفر، 20 دقيقة</span><div><b>retry + timeout + fallback:</b> function واحدة بتلف أي call للموديل، وtests بموديل وهمي بيقع بطرق مختلفة.</div><span class="pill">جاي</span></div>
     <div class="task"><span class="rung">Task 4 · Bug hunt</span><div><b>50 request مع بعض:</b> API وهمي بيرجّع 429 لما يتضغط، وendpoint فيه مشكلة مستخبية. لاقيها من الأرقام.</div><span class="pill">جاي</span></div>
@@ -1503,6 +1503,7 @@ wait       first anything 9.06s · first word 9.06s · total 9.06s</pre>
     <tr><td>مراجعة متباعدة (M2 + M3)، 3 أسئلة</td><td>2026-10-24</td><td>✓ 3/3: الـ API stateless ← ب · <code>.catch("low")</code> بيحوّل <code>"High"</code> لـ low ساكت ← ج · الـ retry بيكبّر الـ input ~2.6× ← أ</td></tr>
     <tr><td>سؤال الفكرة 1 (الـ streaming بيغيّر إيه)</td><td>2026-10-25</td><td>✓ ج: أول حاجة بتظهر أبدر، والوقت الكلي زي ما هو</td></tr>
     <tr><td>سؤال الفكرة 2 (أنهي event للشاشة)</td><td>2026-10-26</td><td>✓ د: <code>text_delta</code></td></tr>
+    <tr><td>Task 1 · التوقّعات والتشغيل</td><td>2026-10-26</td><td>✗ 1 ج (3–6s)، والصح أ: أول event (<code>thinking</code>) بيوصل بعد ~0.12s، عشان الـ server بيبعته أول ما الموديل <b>يبدأ</b> يفكّر، مش لما يخلص. ✓ 2 ب · ✓ 3 ب. شغّله بنفسه. تشغيلي: الـ median للـ stream 0.12s / أول كلمة 2.86s / الكلي 5.99s، والـ wait 9.06s. <b>Task 1 خلص</b></td></tr>
   </table></div>
 
   <div class="glossary" id="m4-glossary">

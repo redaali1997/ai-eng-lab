@@ -216,8 +216,8 @@ being quietly turned into something else. Write down `/stats` before and after.
 
 | Task | Rung | Status | What |
 |---|---|---|---|
-| 1 | Worked example | current | The same reply sent two ways: wait for all of it, or stream it piece by piece (SSE). Time both. |
-| 2 | Fill the gap | upcoming | Which errors deserve a retry, and how long to wait before it. |
+| 1 | Worked example | done | The same reply sent two ways: wait for all of it, or stream it piece by piece (SSE). Time both. |
+| 2 | Fill the gap | current | Which errors deserve a retry, and how long to wait before it. |
 | 3 | From scratch, timed | upcoming | Retry + timeout + fallback around any model call, with tests. |
 | 4 | Bug hunt | upcoming | 50 concurrent requests against an API that answers 429 under load. |
 
