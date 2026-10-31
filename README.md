@@ -239,6 +239,19 @@ a) under 0.5s b) 1–3s c) 3–6s d) the same as `wait`'s total
 c) the same as `wait`'s total (3) `stream` total vs `wait` total: a) stream is always much faster
 b) roughly similar, and both change from round to round c) stream is always much slower
 
+### M4 Task 2 — how to run
+
+Two TODOs in `src/m4/task-2/retry-policy.ts`: `isRetryable(err)` and `backoffDelay(attempt)`.
+The comments above each one say exactly which errors count and how the delay grows.
+
+```bash
+npm run m4:t2:test   # 11 tests, 8 fail until both TODOs are written
+npm run m4:t2        # instant demo, no model calls: decisions, one client's delays, 50 clients coming back
+```
+
+Before running the demo with your code, pick: (1) In "50 clients, 2nd retry", the busiest 50ms window will have:
+a) all 50 b) 25–40 c) 8–15 d) 1–2. (2) "before retry 6" will be: a) 16000ms b) between 6000 and 8000ms c) exactly 500ms
+
 ## How to measure (Module 1)
 
 - Task 1: count how many of the 5 runs are `NEW - never written anywhere`, in both modes.

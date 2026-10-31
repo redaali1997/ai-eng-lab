@@ -32,7 +32,9 @@
     "m3:t4:server": "node --env-file-if-exists=.env src/m3/task-4/server.ts",
     "m3:t4:load": "node src/m3/task-4/load.ts",
     "m4:t1:server": "node --env-file-if-exists=.env src/m4/task-1/server.ts",
-    "m4:t1": "node src/m4/task-1/measure.ts"
+    "m4:t1": "node src/m4/task-1/measure.ts",
+    "m4:t2:test": "node --test src/m4/task-2/*.test.ts",
+    "m4:t2": "node src/m4/task-2/run.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "0.135.0",
