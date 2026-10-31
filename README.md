@@ -252,6 +252,20 @@ npm run m4:t2        # instant demo, no model calls: decisions, one client's del
 Before running the demo with your code, pick: (1) In "50 clients, 2nd retry", the busiest 50ms window will have:
 a) all 50 b) 25–40 c) 8–15 d) 1–2. (2) "before retry 6" will be: a) 16000ms b) between 6000 and 8000ms c) exactly 500ms
 
+### M4 Task 3 — how to run (timed: 20 minutes, no peeking at the demo's output first)
+
+Write `resilientCall(primary, fallback, opts)` in `src/m4/task-3/resilient.ts`. The TODO lists the 6 rules.
+Reuse Task 2's `isRetryable` and `backoffDelay`. `fakes.ts` has scripted fake model calls (reply / status / hang).
+
+```bash
+npm run m4:t3:test   # 9 tests with fake calls, all fail until resilientCall is written (instant, no model)
+npm run m4:t3        # 6 real questions on Ollama; the primary answers 429 about 40% of the time (~40s)
+npm run m4:t3:down   # same, but the primary is down (always 529), like 11 Dec 2024 (~30s)
+```
+
+Before running, pick: (1) `m4:t3`: how many customers see an error? a) 2–3 b) 1 c) 0
+(2) `m4:t3:down`: how many calls in total for the 6 questions? a) 6 b) 12 c) 18 d) 24
+
 ## How to measure (Module 1)
 
 - Task 1: count how many of the 5 runs are `NEW - never written anywhere`, in both modes.
