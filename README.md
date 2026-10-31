@@ -218,8 +218,8 @@ being quietly turned into something else. Write down `/stats` before and after.
 |---|---|---|---|
 | 1 | Worked example | done | The same reply sent two ways: wait for all of it, or stream it piece by piece (SSE). Time both. |
 | 2 | Fill the gap | done | Which errors deserve a retry, and how long to wait before it. |
-| 3 | From scratch, timed | current | Retry + timeout + fallback around any model call, with tests. |
-| 4 | Bug hunt | upcoming | 50 concurrent requests against an API that answers 429 under load. |
+| 3 | Fill the gap (guided) | done | Retry + timeout + fallback around any model call, with tests. |
+| 4 | Bug hunt | current | 50 concurrent requests against an API that answers 429 under load. |
 
 Note: Ollama never returns 429 (it queues requests instead), so later tasks use a fake API that does.
 
@@ -252,7 +252,7 @@ npm run m4:t2        # instant demo, no model calls: decisions, one client's del
 Before running the demo with your code, pick: (1) In "50 clients, 2nd retry", the busiest 50ms window will have:
 a) all 50 b) 25–40 c) 8–15 d) 1–2. (2) "before retry 6" will be: a) 16000ms b) between 6000 and 8000ms c) exactly 500ms
 
-### M4 Task 3 — how to run (timed: 20 minutes, no peeking at the demo's output first)
+### M4 Task 3 — how to run
 
 Write `resilientCall(primary, fallback, opts)` in `src/m4/task-3/resilient.ts`. The TODO lists the 6 rules.
 Reuse Task 2's `isRetryable` and `backoffDelay`. `fakes.ts` has scripted fake model calls (reply / status / hang).

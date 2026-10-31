@@ -19,11 +19,16 @@ export type Options = {
   sleep?: (ms: number) => Promise<void>; // injectable so tests do not really wait
 };
 
-export const CANNED_REPLY = "Thanks for your patience. Our assistant is busy right now; a person will reply within the hour.";
+export const CANNED_REPLY =
+  "Thanks for your patience. Our assistant is busy right now; a person will reply within the hour.";
 
 const realSleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
-export async function resilientCall(primary: ModelCall, fallback: ModelCall, opts: Options): Promise<Outcome> {
+export async function resilientCall(
+  primary: ModelCall,
+  fallback: ModelCall,
+  opts: Options,
+): Promise<Outcome> {
   const sleep = opts.sleep ?? realSleep;
   // TODO(task-3): write the whole policy here.
   //   1. Call `primary` with a signal that aborts after opts.timeoutMs (AbortSignal.timeout).
@@ -35,6 +40,27 @@ export async function resilientCall(primary: ModelCall, fallback: ModelCall, opt
   //   5. Retries used up -> call `fallback` ONCE (same timeout, no retries) -> { source: "fallback" }.
   //   6. Fallback fails too -> { text: CANNED_REPLY, source: "canned" }. Never throw here.
   //   `attempts` counts every call that was made.
-  void sleep; void backoffDelay; void isRetryable;
-  throw new Error("TODO(task-3): resilientCall is not written yet");
+  let attempts = 0;
+  for (let attempt = 0; attempt <= opts.maxRetries; attempt++) {
+    attempts++;
+    try {
+      const text = await primary(AbortSignal.timeout(opts.timeoutMs));
+      return { source: "primary", text, attempts };
+    } catch (e) {
+      if (!isRetryable(e)) {
+        throw e;
+      }
+      if (attempt < opts.maxRetries) {
+        await sleep(backoffDelay(attempt));
+      }
+    }
+  }
+
+  try {
+    attempts++;
+    const text = await fallback(AbortSignal.timeout(opts.timeoutMs));
+    return { source: "fallback", text, attempts };
+  } catch (e) {
+    return { source: "canned", text: CANNED_REPLY, attempts };
+  }
 }
