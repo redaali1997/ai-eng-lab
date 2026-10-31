@@ -266,6 +266,21 @@ npm run m4:t3:down   # same, but the primary is down (always 529), like 11 Dec 2
 Before running, pick: (1) `m4:t3`: how many customers see an error? a) 2–3 b) 1 c) 0
 (2) `m4:t3:down`: how many calls in total for the 6 questions? a) 6 b) 12 c) 18 d) 24
 
+### M4 Task 4 — bug hunt
+
+The story: a shop's support chat. 50 customers press "send" at the same moment. The model API only accepts
+10 requests per second and answers 429 to the rest. Task 3's `resilientCall` is in place, its 9 tests pass,
+and still most customers get "something went wrong". Find out why from the numbers, fix it, and re-measure.
+
+```bash
+npm run m4:t4:api      # terminal 1: the fake model API (10 requests per second), keep it running
+npm run m4:t4:server   # terminal 2: the support chat backend, restart it after every change
+npm run m4:t4:load     # terminal 3: 50 customers at once; prints answers, wait times and API counters
+```
+
+Done when one load run on a freshly started server shows: all 50 customers answered by `primary`,
+0 `HTTP 500`, and the model API counters show retries really happened. Write down the numbers before and after.
+
 ## How to measure (Module 1)
 
 - Task 1: count how many of the 5 runs are `NEW - never written anywhere`, in both modes.

@@ -1537,7 +1537,9 @@ busiest window: 15 of 50 at once</pre>
 m4:t3:down primary 0 · fallback 6 · canned 0 · errors shown to customers 0 · calls 24 · 28s</pre>
         <b>1 ج، 2 د.</b> ولا زبون شاف error في الحالتين. بس بص على الـ 24: كل سؤال خبط على الـ API الواقع 3 مرات قبل ما يروح للاحتياطي. يعني 18 call رايحين لسيرفر إحنا عارفين إنه واقع. ولو عندك 10,000 زبون، ده جيش بيخبط على باب سيرفر بيحاول يقوم. وده اللي هنقفله في Task 4.
       </details></div><span class="pill done">خلص</span></div>
-    <div class="task"><span class="rung">Task 4 · Bug hunt</span><div><b>50 request مع بعض:</b> API وهمي بيرجّع 429 لما يتضغط، وendpoint فيه مشكلة مستخبية. لاقيها من الأرقام.</div><span class="pill">جاي</span></div>
+    <div class="task"><span class="rung">Task 4 · Bug hunt</span><div><p style="margin-top:0"><b>الحكاية:</b> محل أونلاين عامل عرض، و50 زبون داسوا "ابعت" في الشات في نفس اللحظة. الموديل بيقبل 10 أسئلة بس في الثانية، والباقي بيقولهم "مشغول" (429). وإحنا عندنا <code>resilientCall</code> بتاعة Task 3، والـ 9 tests بتوعها عدّوا. ومع ذلك، <b>40 زبون من 50</b> بيشوفوا "something went wrong".</p>
+      <p><b>الملفات:</b> <code>fake-api.ts</code> = الموديل الوهمي (10 في الثانية). <code>support-client.ts</code> = الـ client اللي بيكلّمه. <code>server.ts</code> = الشات نفسه، وكل رسالة بتعدّي على <code>resilientCall</code>. <code>load.ts</code> = الـ 50 زبون.</p>
+      <p>شغّل التلاتة (<code>npm run m4:t4:api</code> ثم <code>m4:t4:server</code> ثم <code>m4:t4:load</code>)، واقرا الأرقام، ولاقي السبب، وصلّحه، وقيس تاني. النجاح: الـ 50 زبون ياخدوا رد من <code>primary</code>، و0 <code>HTTP 500</code>، وعدّاد الـ API يبيّن إن الـ retry اشتغل فعلًا.</p></div><span class="pill now">دلوقتي</span></div>
   </div>
 
   <h2>سجل الأدلة</h2>
