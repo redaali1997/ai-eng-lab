@@ -1122,6 +1122,10 @@ OK: 2   CRASH (not JSON): 8   WRONG (JSON, bad values): 0   out of 10</pre>
     <tr><td>سؤال الفكرة 2 (<code>JSON.parse</code> على "Sure! {...}")</td><td>2026-10-22</td><td>✓ ج: <code>SyntaxError</code></td></tr>
     <tr><td>Task 1 · التوقّعات والتشغيل</td><td>2026-10-22</td><td>سؤال 2 ✓ ب (code fence). سؤال 1 متوقّعش، وقال "رد الموديل مش متوقع"، وده صح (M1). تشغيله طلع <code>OK</code> في نطاق ج (3–5)، وتشغيلي طلع 2. نفس الكود، ورقم مختلف كل مرة. <b>Task 1 خلص</b></td></tr>
     <tr><td>سؤال الفكرة 4 (<code>400</code> بسبب <code>messages</code> فاضية)</td><td>2026-10-31</td><td>✓ ج: مفيش retry، ده bug في الطلب</td></tr>
+    <tr><td>سؤال الفكرة 5 (retry بتاعك × retry الـ SDK)</td><td>2026-10-31</td><td>✓ ج: حوالي 12 مرة</td></tr>
+    <tr><td>Task 2 · المراجعة الأولى</td><td>2026-10-31</td><td>11/11 tests، بس فيه حاجتين مش في الـ tests: (1) لما الانتظار يوصل للسقف، كان بيرجّع <code>8000</code> بالظبط من غير jitter، فالـ 50 عميل في attempt 4 طلعوا كلهم 8000ms (رقم واحد بس). (2) <code>err.status</code> على <code>unknown</code>: الـ type-check بيقع (TS18046)، و<code>isRetryable(null)</code> بيرمي error. ولسه مفيش commit</td></tr>
+    <tr><td>Task 2 · سؤالين + التصليح</td><td>2026-10-31</td><td>✓ 1 ب (الـ cap الأول وبعدين الـ jitter) · ✓ 2 ج (<code>instanceof APIError</code> الأول). صلّح الاتنين. ✗ توقّع الـ demo 1 أ (الـ 50 كلهم في نفس الـ 50ms)، والحقيقي <b>15 من 50</b> (ج). يعني افتكر إن الـ jitter مش هيفرّق كتير. وتوقّع 2 ماتبعتش</td></tr>
+    <tr><td>Task 2 · بعد التصليح</td><td>2026-10-31</td><td>✓ 11/11 tests، والـ type-check عدّى. attempt 4: الـ 50 عميل أخدوا <b>50 انتظار مختلف</b> (بين 6000 و8000ms) بدل 8000 للكل. وأزحم 50ms فيها 15 من 50، بدل الـ 50 كلهم من غير jitter. <code>null</code> و<code>undefined</code> ← false من غير ما يقع. <b>Task 2 خلص</b></td></tr>
     <tr><td>Task 2 · المراجعة الأولى</td><td>2026-10-22</td><td>التوقّع د (9–10). 9/9 tests والـ type-check عدّى، والـ schema و<code>safeParse</code> صح. بس <code>extractJson</code> بياخد لحد <b>أول</b> <code>}</code> مش آخر واحد، فـ JSON فيه object جوّه object بيتقطع (اتجرّب: <code>"meta": {"lang": "en"}</code> ← stage json). وكمان بيرمي error بدل ما يرجّع النص زي ما هو. اتطلب تصليحه، ولسه مفيش commit</td></tr>
     <tr><td>Task 2 · سؤالين اختيار من متعدد + التصليح</td><td>2026-10-22</td><td>✓ 1 ب (أول <code>}</code>) · ✓ 2 أ (رجّع النص عشان error الـ <code>JSON.parse</code> يبقى مفيد). صلّح لـ <code>lastIndexOf</code>، بس في الأول رجّع جملة من عنده بدل النص. ✓ سؤال تالت: أ (<code>return text</code>)، وصلّحها</td></tr>
     <tr><td>Task 2 · القياس</td><td>2026-10-22</td><td>✓ التوقّع د (9–10) صح. <code>OK: 10 · FAIL json: 0 · FAIL schema: 0</code> من 10، بعد ما كانت 2 (أو 3–5) في Task 1، ونفس الشكاوى ونفس الموديل. اللي اتغيّر الكود بتاعنا بس. 9/9 tests. <b>Task 2 خلص</b></td></tr>
@@ -1497,7 +1501,25 @@ wait       first anything 9.06s · first word 9.06s · total 9.06s</pre>
       <ol>
         <li>في "50 clients, 2nd retry"، أزحم 50ms فيها كام عميل؟ أ) الـ 50 كلهم · ب) 25–40 · ج) 8–15 · د) 1–2</li>
         <li>"before retry 6" هيطلع كام؟ أ) 16000ms · ب) بين 6000 و8000ms · ج) 500ms بالظبط</li>
-      </ol></div><span class="pill now">دلوقتي</span></div>
+      </ol>
+      <details><summary>النتيجة الحقيقية (افتحها بعد ما تختار وتشغّل)</summary>
+<pre>before retry 1: 381ms
+before retry 2: 765ms
+before retry 3: 1835ms
+before retry 4: 3885ms
+before retry 5: 6137ms
+before retry 6: 6514ms
+
+--- 50 clients, 2nd retry: how many arrive in each 50ms window ---
+  750ms  ██████████ 10
+  800ms  ████████ 8
+  850ms  ███████████ 11
+  900ms  ██████ 6
+  950ms  ███████████████ 15
+busiest window: 15 of 50 at once</pre>
+        <b>1 ج، 2 ب.</b> من غير jitter، الـ 50 كانوا هيرجعوا في نفس الـ millisecond. والـ 25% دي فرّقتهم على 5 شبابيك، وأزحمهم فيه 15 بس. و"before retry 6" وصل للسقف (8000)، وبعدين الـ jitter شال منه جزء.
+        <b>الفخ اللي ماكانش في الـ tests:</b> لو رجّعت <code>MAX_DELAY_MS</code> على طول لما توصل للسقف، الـ jitter بيختفي بالظبط في الوقت اللي الضغط فيه أعلى. الصح إن الـ cap يتطبّق الأول (<code>Math.min</code>)، وبعدين الـ jitter. وكمان اقرا <code>err.status</code> بس بعد <code>instanceof Anthropic.APIError</code>، عشان أي حاجة ممكن تترمي في <code>catch</code>.
+      </details></div><span class="pill done">خلص</span></div>
     <div class="task"><span class="rung">Task 3 · من الصفر، 20 دقيقة</span><div><b>retry + timeout + fallback:</b> function واحدة بتلف أي call للموديل، وtests بموديل وهمي بيقع بطرق مختلفة.</div><span class="pill">جاي</span></div>
     <div class="task"><span class="rung">Task 4 · Bug hunt</span><div><b>50 request مع بعض:</b> API وهمي بيرجّع 429 لما يتضغط، وendpoint فيه مشكلة مستخبية. لاقيها من الأرقام.</div><span class="pill">جاي</span></div>
   </div>
