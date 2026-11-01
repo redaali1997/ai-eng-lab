@@ -21,7 +21,8 @@ const askModel = (message: string): ModelCall => async (signal) => {
     return msg.content.find((b) => b.type === "text")?.text ?? "";
   } catch (err) {
     // Add the customer's message so whoever is on call can find the conversation in the logs.
-    throw new Error(`model call failed for "${message.slice(0, 40)}": ${String(err)}`);
+    console.error(`model call failed for "${message.slice(0, 40)}"`);
+    throw err;
   }
 };
 
@@ -40,6 +41,7 @@ const server = createServer(async (req, res) => {
     stats.customers++;
     try {
       const r = await resilientCall(askModel(message), fallback, RETRY);
+      
       stats[r.source]++;
       return send(200, { text: r.text, source: r.source, attempts: r.attempts });
     } catch (err) {

@@ -219,7 +219,7 @@ being quietly turned into something else. Write down `/stats` before and after.
 | 1 | Worked example | done | The same reply sent two ways: wait for all of it, or stream it piece by piece (SSE). Time both. |
 | 2 | Fill the gap | done | Which errors deserve a retry, and how long to wait before it. |
 | 3 | Fill the gap (guided) | done | Retry + timeout + fallback around any model call, with tests. |
-| 4 | Bug hunt | current | 50 concurrent requests against an API that answers 429 under load. |
+| 4 | Bug hunt | done | 50 concurrent requests against an API that answers 429 under load. |
 
 Note: Ollama never returns 429 (it queues requests instead), so later tasks use a fake API that does.
 

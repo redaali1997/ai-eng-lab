@@ -147,7 +147,7 @@ footer { margin-top: 60px; font-size: 13.5px; color: var(--muted); border-top: 1
   <button role="tab" aria-controls="m1" aria-selected="false">M1 · يعني إيه LLM ✓</button>
   <button role="tab" aria-controls="m2" aria-selected="false">M2 · الموديل مبيفتكرش ✓</button>
   <button role="tab" aria-controls="m3" aria-selected="false">M3 · JSON يدخل الكود ✓</button>
-  <button role="tab" aria-controls="m4" aria-selected="false">M4 · Streaming والأخطاء</button>
+  <button role="tab" aria-controls="m4" aria-selected="false">M4 · Streaming والأخطاء ✓</button>
 </nav>
 
 <!-- ============ PLAN ============ -->
@@ -184,8 +184,8 @@ footer { margin-top: 60px; font-size: 13.5px; color: var(--muted); border-top: 1
         <div class="meta">system prompt، messages وأدوار user/assistant، الـ API stateless (إنت اللي بتبعت المحادثة كلها كل مرة)، context window — Huyen ف5، anthropics/courses (Prompt engineering، Real-world prompting)، Claude docs (Prompt engineering) · النجاح: chat endpoint بيفتكر آخر 10 رسايل، وتقيس التكلفة بتزيد إزاي مع طول المحادثة</div> <span class="pill done">خلص 2026-10-22</span></li>
       <li class="done"><div class="t">M3 · Structured output: الرد يبقى JSON يدخل الكود</div>
         <div class="meta">JSON schema، zod، <span class="en">messages.parse</span>، التحقق من الرد — Claude docs (Structured outputs)، Huyen ف5 · النجاح: classifier للـ support tickets بيرجّع JSON صح 50/50 مرة</div> <span class="pill done">خلص 2026-10-24</span></li>
-      <li class="now"><div class="t">M4 · Streaming والأخطاء: الـ call في الـ production</div>
-        <div class="meta">streaming للـ UI، timeouts، retries، rate limits (429)، الـ refusal stop reason، fallbacks — Claude docs (Streaming, Errors, Rate limits) · النجاح: endpoint بيعمل stream، ولما تبعتله 50 request مرة واحدة ميقعش</div></li>
+      <li class="done"><div class="t">M4 · Streaming والأخطاء: الـ call في الـ production</div>
+        <div class="meta">streaming للـ UI، timeouts، retries، rate limits (429)، الـ refusal stop reason، fallbacks — Claude docs (Streaming, Errors, Rate limits) · النجاح: endpoint بيعمل stream، ولما تبعتله 50 request مرة واحدة ميقعش</div> <span class="pill done">خلص 2026-11-01</span></li>
     </ol>
     <div class="passtest"><b>اختبار المستوى:</b> HTTP endpoint في Node بياخد شكوى زبون، يرجّع JSON متحقّق منه (النوع، الأولوية، ملخّص)، ويعمل stream لرد مقترح، ويستحمل 429 من غير ما يقع. وكل request بيطبع تكلفته.</div>
   </div>
@@ -194,7 +194,7 @@ footer { margin-top: 60px; font-size: 13.5px; color: var(--muted); border-top: 1
   <div class="level">
     <div class="level-head"><h2>المستوى 2 · Intermediate: الموديل يشتغل ببياناتك</h2><span class="pill">5 modules</span></div>
     <ol class="modlist">
-      <li><div class="t">M5 · Tool use: الموديل يطلب من الكود بتاعك يعمل حاجة</div>
+      <li class="now"><div class="t">M5 · Tool use: الموديل يطلب من الكود بتاعك يعمل حاجة</div>
         <div class="meta">function calling، <span class="en">tool_use</span> / <span class="en">tool_result</span>، <span class="en">strict</span>، parallel tools، الـ loop — Claude docs (Tool use)، anthropics/courses (Tool use)، Huyen ف6 · النجاح: bot يجاوب "طلبي فين؟" من الـ database بتاعتك مش من خياله</div></li>
       <li><div class="t">M6 · Embeddings والبحث بالمعنى</div>
         <div class="meta">embedding = أرقام بتمثّل المعنى، similarity، pgvector، index (HNSW) — Alammar ف2 وف8، pgvector docs، Huyen ف6 · النجاح: بحث يلاقي "عايز فلوسي ترجع" لما تكتب "refund"، وتقيس الـ latency بـ index ومن غيره على 100k صف</div></li>
@@ -504,6 +504,8 @@ mode: greedy
     <tr><td>Task 3 · قال "صعب ومش فاهم البيزنس"</td><td>2026-10-31</td><td>قال إن الـ tasks صعبة من غير ما البيزنس والكود يتشرحوا، وإنه بيتحبط. <b>مع إن كوده كان 8/9 tests</b> (ناقصه <code>await</code> قبل <code>sleep</code>، وبيستنى بعد آخر محاولة). من هنا ورايح: كل task يبدأ بحكاية البيزنس في 3 سطور + الكود متقسّم خطوات صغيرة، قبل الـ TODO. وأنا غلطت وكتبت فوق ملفه لحظة، ورجّعته بالظبط من الـ VS Code history</td></tr>
     <tr><td>Task 3 · سؤالين + التصليح</td><td>2026-10-31</td><td>✓ 1 ب (من غير <code>await</code> مش هيستنى خالص) · ✓ 2 ج (ماتستناش بعد آخر محاولة). صلّح الاتنين، و9/9 tests</td></tr>
     <tr><td>Task 3 · الـ demos على Ollama</td><td>2026-10-31</td><td>✓ <code>m4:t3</code> (429 بنسبة 40%): primary 4 · fallback 2 · canned 0 · <b>errors للزباين 0</b> · 12 call · 18s. و<code>m4:t3:down</code> (الأساسي واقع): fallback 6 · <b>0 errors</b> · بس <b>24 call</b> (كل سؤال: 3 محاولات على API واقع + 1 احتياطي). الزبون ماشافش error، بس إحنا فضلنا نخبط على سيرفر واقع 18 مرة. وده رابط سؤال الـ module. <b>Task 3 خلص</b></td></tr>
+    <tr><td>Task 4 · Bug hunt</td><td>2026-11-01</td><td>قبل: <code>primary 10 · HTTP 500 40</code>، و<code>requests per customer: 1.0</code>. خد تلميح (✗ ماختارش من الـ MCQ)، وبعدين طلب الحل، فقلتهوله بحكاية الظرف والختم. ✓ اختار التصليح الصح (ب: log + <code>throw err</code>) وطبّقه بنفسه. ✓ توقّع ب (أكتر من 1). بعد: <code>primary 50</code>، و0 errors، و190 request (140 منهم 429)، يعني 3.8 للزبون، وأبطأ زبون 15.2s. <b>Task 4 خلص</b></td></tr>
+    <tr><td>سؤال من عنده</td><td>2026-11-01</td><td>سأل: "<code>resilientCall(askModel(message), ...)</code> ده بينفّذ <code>askModel</code> ولا بيبعتها function؟". سؤال ممتاز: بينفّذها، بس هي بترجّع function تانية فاكرة الرسالة. اتشرحت بالـ "ريموت مبرمج"</td></tr>
     <tr><td>Task 3 · الكود</td><td>2026-10-21</td><td>✓ 8/8 tests والـ type-check عدّى. <code>costUsd</code> مظبوطة. <code>countDistinct</code> صح، بس ممكن تتكتب أبسط بـ <code>Set</code>. الوقت: حوالي 29 دقيقة من مواعيد حفظ الملفات (تقدير، الهدف كان 20)</td></tr>
     <tr><td>Task 3 · التجربة (5 مرات)</td><td>2026-10-21</td><td>5/5 مختلفين لو قارنت النص حرف بحرف، بس الـ 5 بيقولوا <b>نفس المعنى</b> ("بيعتمد على المتجر وطريقة الدفع"). الـ output من 231 لـ 326 token لجملة واحدة حوالي 15 token، يعني أكتر من 90% تفكير. التكلفة لو على Opus من $0.0046 لـ $0.0065 للـ call، والمجموع $0.02798</td></tr>
     <tr><td>Task 4 · قبل التصليح</td><td>2026-10-21</td><td>8 ردود فاضية من 10 (في تشغيلي كانوا 9). كل call بالظبط <code>out=256</code>، والتكلفة $0.052592</td></tr>
@@ -1539,7 +1541,8 @@ m4:t3:down primary 0 · fallback 6 · canned 0 · errors shown to customers 0 ·
       </details></div><span class="pill done">خلص</span></div>
     <div class="task"><span class="rung">Task 4 · Bug hunt</span><div><p style="margin-top:0"><b>الحكاية:</b> محل أونلاين عامل عرض، و50 زبون داسوا "ابعت" في الشات في نفس اللحظة. الموديل بيقبل 10 أسئلة بس في الثانية، والباقي بيقولهم "مشغول" (429). وإحنا عندنا <code>resilientCall</code> بتاعة Task 3، والـ 9 tests بتوعها عدّوا. ومع ذلك، <b>40 زبون من 50</b> بيشوفوا "something went wrong".</p>
       <p><b>الملفات:</b> <code>fake-api.ts</code> = الموديل الوهمي (10 في الثانية). <code>support-client.ts</code> = الـ client اللي بيكلّمه. <code>server.ts</code> = الشات نفسه، وكل رسالة بتعدّي على <code>resilientCall</code>. <code>load.ts</code> = الـ 50 زبون.</p>
-      <p>شغّل التلاتة (<code>npm run m4:t4:api</code> ثم <code>m4:t4:server</code> ثم <code>m4:t4:load</code>)، واقرا الأرقام، ولاقي السبب، وصلّحه، وقيس تاني. النجاح: الـ 50 زبون ياخدوا رد من <code>primary</code>، و0 <code>HTTP 500</code>، وعدّاد الـ API يبيّن إن الـ retry اشتغل فعلًا.</p></div><span class="pill now">دلوقتي</span></div>
+      <p>شغّل التلاتة (<code>npm run m4:t4:api</code> ثم <code>m4:t4:server</code> ثم <code>m4:t4:load</code>)، واقرا الأرقام، ولاقي السبب، وصلّحه، وقيس تاني. النجاح: الـ 50 زبون ياخدوا رد من <code>primary</code>، و0 <code>HTTP 500</code>، وعدّاد الـ API يبيّن إن الـ retry اشتغل فعلًا.</p>
+      <details><summary>الحل (بعد ما تخلّص)</summary>في <code>server.ts</code>، جوّه <code>askModel</code>: الـ <code>catch</code> كان بيعمل <code>throw new Error(`model call failed for ...: ${String(err)}`)</code> عشان يحط رسالة الزبون في الـ log. بس الـ error الجديد ده <b>مالوش <code>status</code> ومش <code>APIError</code></b>، فـ <code>isRetryable</code> قالت "مش من الـ API، ماتعملش retry"، و<code>resilientCall</code> رمته على طول. زي ما تاخد جواب عليه ختم "429 · ابعت تاني"، وتحطه في ظرف جديد من غير الختم. النتيجة: <code>requests per customer: 1.0</code>، و10 primary، و40 <code>HTTP 500</code>. التصليح: سجّل الرسالة بـ <code>console.error</code>، وبعدين <code>throw err</code> نفسه. (ولو محتاج تضيف معلومة، <code>new Error(msg, { cause: err })</code> بس ساعتها <code>isRetryable</code> لازم تبص على <code>cause</code>.) بعد التصليح: 50/50 primary، و0 errors، و3.8 request للزبون، وأبطأ زبون 15s.</details></div><span class="pill done">خلص</span></div>
   </div>
 
   <h2>سجل الأدلة</h2>
@@ -1578,6 +1581,22 @@ m4:t3:down primary 0 · fallback 6 · canned 0 · errors shown to customers 0 ·
   <div class="check"><b>3.</b> ليه الـ jitter مهم مع الـ backoff؟
     <ol class="mcq"><li>أ) عشان الـ requests مترجعش كلها في نفس اللحظة وتعمل زحمة تانية</li><li>ب) عشان يقلّل عدد الـ retries</li><li>ج) عشان الـ API بيطلبه</li><li>د) عشان يخلّي الانتظار أقصر</li></ol>
     <details><summary>الإجابة</summary><b>أ.</b> من غيره، كل اللي فشلوا مع بعض هيرجعوا مع بعض ويفشلوا مع بعض تاني.</details></div>
+  <div class="closed">
+    <span class="eyebrow">قفلة الـ module · 2026-11-01</span>
+    <p class="teaser" style="margin:0">ليه إنك "تحاول تاني" لما الـ API يقع، ممكن تخلّي الوقعة أطول بدل ما تحلّها؟</p>
+    <p style="margin:0">عشان كل retry هو request جديد على سيرفر هو أصلًا مش ملاحق. لو آلاف الـ clients عملوا retry في نفس اللحظة (من غير backoff ولا jitter)، أو كل request اتعمله retry مرتين فوق بعض (retry بتاعك × retry الـ SDK = 12)، السيرفر وهو بيحاول يقوم بيلاقي طوفان أكبر من الأول، فيقع تاني. شفناها بالأرقام: الـ jitter فرّق 50 عميل لدرجة إن أزحم 50ms بقى فيها 15 بس. ويوم ما الأساسي وقع (<code>m4:t3:down</code>)، خبطنا عليه 18 مرة زيادة على الفاضي. الحل: backoff + jitter، وطبقة retry واحدة بس، وحد أقصى، وfallback، وtimeout. والخطوة الجاية (M10/M15) هي الـ <span class="en">circuit breaker</span>: لو الأساسي واقع، تبطّل تكلّمه خالص لفترة.</p>
+    <div class="finish">
+      <div class="stat bad"><span class="big">9.06s → 0.12s</span><div class="lbl">أول حاجة على الشاشة: شاشة فاضية لحد الرد كله، وبعدين event "بيفكّر..." بالـ streaming (Task 1، median 3 جولات)</div></div>
+      <div class="stat good"><span class="big">10/50 → 50/50</span><div class="lbl">50 زبون في نفس اللحظة على API بيقبل 10 في الثانية: قبل التصليح 40 شافوا 500، وبعده الكل خد رد (Task 4). التقدير كان ~30</div></div>
+      <div class="stat good"><span class="big">0</span><div class="lbl">errors ظهرت للزباين في الـ demos، حتى والموديل الأساسي واقع خالص (Task 3)</div></div>
+    </div>
+    <ul class="cando">
+      <li class="ok">✓ endpoint الرد بتاعه بيظهر كلمة كلمة (Task 1، <code>/reply/stream</code>)</li>
+      <li class="ok">✓ تجاوب في interview: "الـ API رجّع 429، تعمل إيه؟": retry بـ exponential backoff + jitter، طبقة واحدة، حد أقصى، تحترم <code>retry-after</code>، وبعدها fallback. وماتعملش retry على 400/401</li>
+      <li class="ok">✓ اختبار المستوى 1: endpoint بيعمل stream، وبيستحمل 50 request مع بعض</li>
+    </ul>
+    <p class="muted" style="margin:0">ملحوظات للمستوى: في Task 3 قال إن الـ tasks صعبة من غير شرح البيزنس والكود، وكان قرّب يوقف، مع إن كوده كان 8/9. من هنا ورايح كل task بيبدأ بحكاية + مشي في الكود + خطوات صغيرة + رسمة. الـ bug hunt (خطأ اتلفّ في <code>new Error</code> فضاع الـ status) كان أصعب حاجة، واحتاج الحل. وسأل سؤال ممتاز عن الـ function اللي بترجّع function، وده موضوع يستاهل مراجعة.</p>
+  </div>
 </section>
 
 <footer>Track بطريقة skill-coach · الصفحة دي بتتحدّث مع كل module · آخر تحديث 2026-10-24</footer>
